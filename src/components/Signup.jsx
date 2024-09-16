@@ -1,40 +1,55 @@
-
 import { useState } from 'react';
-import api from '../api.js';
+import { useNavigate } from 'react-router-dom';
+import { createAdmin } from '../api';  
+
+
+//! Double check the code below and make sure that it routes to either admin or doctor dashboard
 
 const Signup = () => {
     const [username, setUsername] = useState('');
     const [password, setPassword] = useState('');
+    const [loading, setLoading] = useState(false);
+    const navigate = useNavigate();
 
     const handleSignup = async (e) => {
         e.preventDefault();
+        setLoading(true);
         try {
-            await api.post('/users/register/', { username, password, role: 'admin' });
-            alert('Superuser created. You can now log in.');
+            const response = await createAdmin({ username, password });  // Create an admin request
+
+            // After successful admin creation, navigate to the login page
+            alert('Admin account created successfully. Please log in.');
+            navigate('/');  // Redirect to the login page
         } catch (error) {
-            console.error('Signup failed:', error);
+            const errorMessage = error.response?.data?.detail || 'Signup failed. Please try again.';
+            alert(errorMessage);
+        } finally {
+            setLoading(false);
         }
     };
 
     return (
-        <div>
-            <h2>Sign Up as Superuser</h2>
-            <form onSubmit={handleSignup}>
-                <input
-                    type="text"
-                    placeholder="Username"
-                    value={username}
-                    onChange={(e) => setUsername(e.target.value)}
-                />
-                <input
-                    type="password"
-                    placeholder="Password"
-                    value={password}
-                    onChange={(e) => setPassword(e.target.value)}
-                />
-                <button type="submit">Sign Up</button>
-            </form>
-        </div>
+        <form onSubmit={handleSignup}>
+            <h2>Create Admin Account</h2>
+            <input
+                type="text"
+                placeholder="Username"
+                value={username}
+                onChange={(e) => setUsername(e.target.value)}
+                required
+            />
+            <input
+                type="password"
+                placeholder="Password"
+                value={password}
+                onChange={(e) => setPassword(e.target.value)}
+                required
+                autoComplete="new-password"
+            />
+            <button type="submit" disabled={loading}>
+                {loading ? 'Creating Admin...' : 'Create Admin'}
+            </button>
+        </form>
     );
 };
 

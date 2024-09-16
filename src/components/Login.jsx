@@ -1,7 +1,6 @@
-
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { login } from '../api.js';
+import { login } from '../api';  // Assuming you have an API utility for making requests
 
 const Login = () => {
     const [username, setUsername] = useState('');
@@ -14,14 +13,29 @@ const Login = () => {
         setLoading(true);
         try {
             const response = await login({ username, password });
+
+            // Store tokens in local storage
             localStorage.setItem('access_token', response.data.access);
             localStorage.setItem('refresh_token', response.data.refresh);
-            navigate('/dashboard'); 
+            
+            // Check user role and navigate to the appropriate dashboard
+            const role = response.data.role;  // Get role from response
+
+            if (role === 'admin') {
+                navigate('/admin/dashboard');
+            } else if (role === 'doctor') {
+                navigate('/doctor/dashboard');
+            } else if (role === 'superuser') {
+                // Handle superusers
+                navigate('/superuser/dashboard');  // Or wherever your superuser dashboard is
+            } else {
+                alert('Unknown role');
+            }
         } catch (error) {
-            const errorMessage = error.response?.data?.detail || 'An unexpected error occurred';
-            alert('Login failed: ' + errorMessage); 
+            const errorMessage = error.response?.data?.detail || 'Login failed. Please try again.';
+            alert(errorMessage);
         } finally {
-            setLoading(false); 
+            setLoading(false);
         }
     };
 
@@ -40,6 +54,7 @@ const Login = () => {
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
                 required
+                autoComplete="current-password"
             />
             <button type="submit" disabled={loading}>
                 {loading ? 'Logging in...' : 'Login'}
