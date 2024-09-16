@@ -1,44 +1,34 @@
-import { Routes, Route } from 'react-router-dom'; // No BrowserRouter here
+import { Routes, Route } from 'react-router-dom';
+import Signup from './components/Signup';  // Signup component
 import Login from './components/Login';
+import AdminDashboard from './components/AdminDashboard';
 import DoctorDashboard from './components/DoctorDashboard';
-import DiseaseList from './components/DiseaseList';
-import PatientList from './components/PatientList';
-import LogoutButton from './components/LogoutButton';
-import PrivateRoute from './components/PrivateRoute';  // Import PrivateRoute
+import PrivateRoute from './components/PrivateRoute';
 
 const App = () => {
-  return (
-    <div>
-      <LogoutButton />
-      <Routes>
-        <Route path="/" element={<Login />} />
-        <Route
-          path="/dashboard"
-          element={
-            <PrivateRoute>
-              <DoctorDashboard />
-            </PrivateRoute>
-          }
-        />
-        <Route
-          path="/diseases"
-          element={
-            <PrivateRoute>
-              <DiseaseList />
-            </PrivateRoute>
-          }
-        />
-        <Route
-          path="/patients"
-          element={
-            <PrivateRoute>
-              <PatientList />
-            </PrivateRoute>
-          }
-        />
-      </Routes>
-    </div>
-  );
+    return (
+        <Routes>
+            {/* Show the Signup form on the landing page */}
+            <Route path="/" element={<Signup />} />
+
+            {/* Login page */}
+            <Route path="/login" element={<Login />} />
+
+            {/* Admin dashboard: only accessible to 'admin' role */}
+            <Route path="/admin/dashboard" element={
+                <PrivateRoute allowedRoles={['admin']}>
+                    <AdminDashboard />
+                </PrivateRoute>
+            } />
+
+            {/* Doctor dashboard: only accessible to 'doctor' role */}
+            <Route path="/doctor/dashboard" element={
+                <PrivateRoute allowedRoles={['doctor']}>
+                    <DoctorDashboard />
+                </PrivateRoute>
+            } />
+        </Routes>
+    );
 };
 
 export default App;

@@ -9,6 +9,15 @@ const getAuthHeaders = () => {
     return token ? { Authorization: `Bearer ${token}` } : {};
 };
 
+
+export const createAdmin = async (credentials) => {
+    return await api.post('/users/register/', {
+        ...credentials,
+        role: 'admin'  
+    });
+};
+
+
 api.interceptors.response.use(
     (response) => response,
     async (error) => {
@@ -25,8 +34,8 @@ api.interceptors.response.use(
 );
 
 // Login request - retrieves the access and refresh tokens
-export const login = (credentials) => {
-    return api.post('/token/', credentials);
+export const login = async (credentials) => {
+    return await axios.post('http://localhost:8000/token/', credentials);
 };
 
 // Refresh token request
@@ -38,16 +47,22 @@ export const refreshToken = async () => {
     }
 };
 
-// Doctors API - List and create doctors
+// Users API - Add getUsers function
+export const getUsers = () => api.get('/users/', { headers: getAuthHeaders() });  // Fetch the list of users
+
+// Doctors API
 export const getDoctors = () => api.get('/doctors/', { headers: getAuthHeaders() });
 export const getDoctor = (id) => api.get(`/doctors/${id}/`, { headers: getAuthHeaders() });
 export const createDoctor = (data) => api.post('/doctors/', data, { headers: getAuthHeaders() });
 export const updateDoctor = (id, data) => api.put(`/doctors/${id}/`, data, { headers: getAuthHeaders() });
 export const deleteDoctor = (id) => api.delete(`/doctors/${id}/`, { headers: getAuthHeaders() });
 
-// Patients API - List and create patients
+// Patients API
 export const getPatients = () => api.get('/patients/', { headers: getAuthHeaders() });
 export const getPatient = (id) => api.get(`/patients/${id}/`, { headers: getAuthHeaders() });
 
-// Diseases API - List diseases
+// Diseases API
 export const getDiseases = () => api.get('/diseases/', { headers: getAuthHeaders() });
+
+// Add deleteUser function
+export const deleteUser = (id) => api.delete(`/users/${id}/`, { headers: getAuthHeaders() });
