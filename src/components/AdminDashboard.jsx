@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react';
 import { deleteUser, getUsers } from '../api.js';  // Import getUsers and deleteUser
 
-const AdminDashboard = () => {  // Make sure this is declared as a component
+const UsersDashboard = () => {  // Make sure this is declared as a component
     const [users, setUsers] = useState([]);
     
     useEffect(() => {
@@ -54,4 +54,4 @@ const AdminDashboard = () => {  // Make sure this is declared as a component
     );
 };
 
-export default AdminDashboard;  // Ensure this is a default export
+export default UsersDashboard;  // Ensure this is a default export

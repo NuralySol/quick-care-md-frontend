@@ -1,11 +1,11 @@
 import { Routes, Route } from 'react-router-dom';
 import Signup from './components/Signup';  // Signup component
 import Login from './components/Login';
-import AdminDashboard from './components/AdminDashboard';
+import UsersDashboard from './components/AdminDashboard';
 import DoctorDashboard from './components/DoctorDashboard';
 import PrivateRoute from './components/PrivateRoute';
 
-const App = () => {
+const App = () => {       
     return (
         <Routes>
             {/* Show the Signup form on the landing page */}
@@ -17,7 +17,7 @@ const App = () => {
             {/* Admin dashboard: only accessible to 'admin' role */}
             <Route path="/admin/dashboard" element={
                 <PrivateRoute allowedRoles={['admin']}>
-                    <AdminDashboard />
+                    <UsersDashboard />
                 </PrivateRoute>
             } />
 
