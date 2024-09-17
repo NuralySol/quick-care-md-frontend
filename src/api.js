@@ -9,14 +9,12 @@ const getAuthHeaders = () => {
     return token ? { Authorization: `Bearer ${token}` } : {};
 };
 
-
 export const createAdmin = async (credentials) => {
     return await api.post('/users/register/', {
         ...credentials,
         role: 'admin'  
     });
 };
-
 
 api.interceptors.response.use(
     (response) => response,
@@ -25,9 +23,16 @@ api.interceptors.response.use(
 
         if (error.response.status === 401 && !originalRequest._retry) {
             originalRequest._retry = true;
-            await refreshToken(); 
-            originalRequest.headers['Authorization'] = `Bearer ${localStorage.getItem('access_token')}`;
-            return api(originalRequest); 
+            const tokenRefreshed = await refreshToken(); 
+
+            if (tokenRefreshed) {
+                originalRequest.headers['Authorization'] = `Bearer ${localStorage.getItem('access_token')}`;
+                return api(originalRequest); 
+            } else {
+                localStorage.removeItem('access_token');
+                localStorage.removeItem('refresh_token');
+                window.location.href = '/login';
+            }
         }
         return Promise.reject(error);
     }
@@ -47,8 +52,8 @@ export const refreshToken = async () => {
     }
 };
 
-// Users API - Add getUsers function
-export const getUsers = () => api.get('/users/', { headers: getAuthHeaders() });  // Fetch the list of users
+// Users API
+export const getUsers = () => api.get('/users/', { headers: getAuthHeaders() });
 
 // Doctors API
 export const getDoctors = () => api.get('/doctors/', { headers: getAuthHeaders() });

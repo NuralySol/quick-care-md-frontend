@@ -2,9 +2,6 @@ import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { createAdmin } from '../api';  
 
-
-//! Double check the code below and make sure that it routes to either admin or doctor dashboard
-
 const Signup = () => {
     const [username, setUsername] = useState('');
     const [password, setPassword] = useState('');
@@ -19,7 +16,7 @@ const Signup = () => {
 
             // After successful admin creation, navigate to the login page
             alert('Admin account created successfully. Please log in.');
-            navigate('/');  // Redirect to the login page
+            navigate('/login');  // Redirect to the login page
         } catch (error) {
             const errorMessage = error.response?.data?.detail || 'Signup failed. Please try again.';
             alert(errorMessage);
