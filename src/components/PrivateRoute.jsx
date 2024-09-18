@@ -1,23 +1,31 @@
 import { Navigate } from 'react-router-dom';
-import PropTypes from 'prop-types';
+import { jwtDecode } from 'jwt-decode';
 
 const PrivateRoute = ({ children, allowedRoles }) => {
+    // Get the access token from localStorage
     const token = localStorage.getItem('access_token');
-    const userRole = localStorage.getItem('user_role');  // Assuming you store the role in localStorage after login
 
-    // Check if the token exists and if the user has one of the allowed roles
-    if (!token || !allowedRoles.includes(userRole)) {
-        // Redirect to the login page if not authenticated or authorized
-        return <Navigate to="/login" />;
+    // If there's no token, redirect to login
+    if (!token) {
+        return <Navigate to="/login" replace />;
     }
 
-    // If authenticated and authorized, render the children (the protected route)
-    return children;
-};
+    try {
+        // Decode the token to get the user's role
+        const decodedToken = jwtDecode(token);
+        const userRole = decodedToken.role;  // Assumes the role is stored in the 'role' field
 
-PrivateRoute.propTypes = {
-    children: PropTypes.node.isRequired,
-    allowedRoles: PropTypes.array.isRequired,
+        // Check if the user's role is allowed to access this route
+        if (allowedRoles.includes(userRole)) {
+            return children;
+        } else {
+            // Redirect to the login page or an unauthorized page if the role is not allowed
+            return <Navigate to="/login" replace />;
+        }
+    } catch (error) {
+        // In case of any errors (e.g., token is invalid or expired), redirect to login
+        return <Navigate to="/login" replace />;
+    }
 };
 
 export default PrivateRoute;
