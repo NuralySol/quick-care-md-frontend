@@ -1,5 +1,6 @@
 import { Navigate } from 'react-router-dom';
-import { jwtDecode } from 'jwt-decode';
+import PropTypes from 'prop-types'; // Import PropTypes
+import {jwtDecode} from 'jwt-decode'; // Import jwtDecode properly
 
 const PrivateRoute = ({ children, allowedRoles }) => {
     // Get the access token from localStorage
@@ -23,9 +24,18 @@ const PrivateRoute = ({ children, allowedRoles }) => {
             return <Navigate to="/login" replace />;
         }
     } catch (error) {
+        // Log the error to avoid linting issues, can be removed or enhanced in production
+        console.error("Error decoding token:", error);
+
         // In case of any errors (e.g., token is invalid or expired), redirect to login
         return <Navigate to="/login" replace />;
     }
+};
+
+// Define propTypes for the component
+PrivateRoute.propTypes = {
+    children: PropTypes.node.isRequired,  // 'node' represents anything that can be rendered (e.g., elements, text)
+    allowedRoles: PropTypes.arrayOf(PropTypes.string).isRequired  // Expect an array of strings for allowedRoles
 };
 
 export default PrivateRoute;
