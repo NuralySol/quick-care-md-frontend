@@ -2,10 +2,7 @@ import { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';  
 import { deleteUser as deleteUserApi, getUsers, createDoctor } from '../api';
 
-
-
 const AdminDashboard = () => {
-    // State variables
     const [users, setUsers] = useState([]);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState('');
@@ -14,12 +11,12 @@ const AdminDashboard = () => {
     const [doctorName, setDoctorName] = useState('');
     const [doctorPassword, setDoctorPassword] = useState('');
     const [creatingDoctor, setCreatingDoctor] = useState(false);
+    const [view, setView] = useState('home');
 
     useEffect(() => {
         fetchUsers();
     }, []);
 
-    // Function to fetch users from the backend
     const fetchUsers = async () => {
         setLoading(true);
         setError('');
@@ -34,7 +31,6 @@ const AdminDashboard = () => {
         }
     };
 
-    // Function to handle user deactivation
     const handleDeactivateUser = async (userId) => {
         if (window.confirm('Are you sure you want to deactivate this user?')) {
             setDeactivatingUserId(userId);
@@ -63,16 +59,14 @@ const AdminDashboard = () => {
                 user: {
                     username: doctorUsername,
                     password: doctorPassword,
-                    role: 'doctor', // Hardcoded role
+                    role: 'doctor',
                 },
             };
-    
-            console.log("Sending doctor data to backend:", doctorData);
     
             await createDoctor(doctorData);
     
             alert('Doctor created successfully.');
-            fetchUsers();  // Refresh users
+            fetchUsers();  
             setDoctorUsername('');
             setDoctorName('');
             setDoctorPassword('');
@@ -80,7 +74,6 @@ const AdminDashboard = () => {
         } catch (error) {
             let errorMessage = 'Failed to create doctor.';
             if (error.response && error.response.data) {
-                console.error('Backend error response:', error.response.data);
                 const extractErrorMessages = (errorData) => {
                     let messages = [];
                     for (const [field, value] of Object.entries(errorData)) {
@@ -101,91 +94,103 @@ const AdminDashboard = () => {
             console.error('Failed to create doctor:', error);
         } finally {
             setCreatingDoctor(false);
+            window.location.reload()
         }
-        window.location.reload();
     };
 
     return (
-        <div>
-            <h2>Admin Dashboard</h2>
+        <div style={{ display: 'flex' }}>
+            {/* Sidebar */}
+            <div style={{ width: '250px', backgroundColor: '#f4f4f4', padding: '20px', height: '100vh' }}>
+                <h2>Admin Panel</h2>
+                <ul style={{ listStyle: 'none', padding: '0' }}>
+                    <li>
+                        <button style={{ width: '100%', padding: '10px', marginTop: '10px' }} onClick={() => setView('doctors')}>
+                            Doctors Panel
+                        </button>
+                    </li>
+                    <li style={{ marginTop: '20px' }}>
+                        <Link to="/login" style={{ textDecoration: 'none', color: 'black' }}>
+                            <button style={{ width: '100%', padding: '10px' }}>Login</button>
+                        </Link>
+                    </li>
+                    <li style={{ marginTop: '10px' }}>
+                        <Link to="/" style={{ textDecoration: 'none', color: 'black' }}>
+                            <button style={{ width: '100%', padding: '10px' }}>Back Home</button>
+                        </Link>
+                    </li>
+                </ul>
+            </div>
 
-            {/* Display an error message if something goes wrong */}
-            {/* {error && <p style={{ color: 'red' }}>{error}</p>} */}
+            {/* Main Content */}
+            <div>
+                <h1>Doctors Panel</h1>
 
-            {/* Show loading message while fetching users */}
-            {loading ? (
-                <p>Loading users...</p>
-            ) : (
-                <table>
-                    <thead>
-                        <tr>
-                            <th>Username</th>
-                            <th>Role</th>
-                            <th>Action</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        {users.map((user) => (
-                            <tr key={user.id}>
-                                <td>{user.username}</td>
-                                <td>{user.role}</td>
-                                <td>
-                                    <button
-                                        onClick={() => handleDeactivateUser(user.id)}
-                                        disabled={deactivatingUserId === user.id}
-                                    >
-                                        {deactivatingUserId === user.id ? 'Deactivating...' : 'Deactivate User'}
-                                    </button>
-                                </td>
+                {loading ? (
+                    <p>Loading doctors...</p>
+                ) : (
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>Username</th>
+                                <th>Role</th>
+                                <th>Action</th>
                             </tr>
-                        ))}
-                    </tbody>
-                </table>
-            )}
+                        </thead>
+                        <tbody>
+                            {users
+                                .filter(user => user.role === 'doctor')
+                                .map((user) => (
+                                <tr key={user.id}>
+                                    <td>{user.username}</td>
+                                    <td>{user.role}</td>
+                                    <td>
+                                        <button
+                                            onClick={() => handleDeactivateUser(user.id)}
+                                            disabled={deactivatingUserId === user.id}
+                                        >
+                                            {deactivatingUserId === user.id ? 'Deactivating...' : 'Deactivate'}
+                                        </button>
+                                    </td>
+                                </tr>
+                            ))}
+                        </tbody>
+                    </table>
+                )}
 
-            {/* Form to create a new doctor */}
-            <h3>Create a New Doctor</h3>
-            <form onSubmit={handleCreateDoctor}>
-                <div>
-                    <label>Username:</label>
-                    <input
-                        type="text"
-                        value={doctorUsername}
-                        onChange={(e) => setDoctorUsername(e.target.value)}
-                        required
-                    />
-                </div>
-                <div>
-                    <label>Name:</label>
-                    <input
-                        type="text"
-                        value={doctorName}
-                        onChange={(e) => setDoctorName(e.target.value)}
-                        required
-                    />
-                </div>
-                <div>
-                    <label>Password:</label>
-                    <input
-                        type="password"
-                        value={doctorPassword}
-                        onChange={(e) => setDoctorPassword(e.target.value)}
-                        required
-                    />
-                </div>
-                <button type="submit" disabled={creatingDoctor}>
-                    {creatingDoctor ? 'Creating Doctor...' : 'Create Doctor'}
-                </button>
-            </form>
-
-            {/* Navigation buttons */}
-            <div style={{ marginTop: '20px' }}>
-                <Link to="/">
-                    <button>Go to Home</button>
-                </Link>
-                <Link to="/login" style={{ marginLeft: '10px' }}>
-                    <button>Go to Login</button>
-                </Link>
+                <h3>Create a New Doctor</h3>
+                <form onSubmit={handleCreateDoctor}>
+                    <div>
+                        <label>Username:</label>
+                        <input
+                            type="text"
+                            value={doctorUsername}
+                            onChange={(e) => setDoctorUsername(e.target.value)}
+                            required
+                        />
+                    </div>
+                    <div>
+                        <label>Name:</label>
+                        <input
+                            type="text"
+                            value={doctorName}
+                            onChange={(e) => setDoctorName(e.target.value)}
+                            required
+                        />
+                    </div>
+                    <div>
+                        <label>Password:</label>
+                        <input
+                            type="password"
+                            value={doctorPassword}
+                            onChange={(e) => setDoctorPassword(e.target.value)}
+                            required
+                        />
+                    </div>
+                    <button type="submit" disabled={creatingDoctor}>
+                        {creatingDoctor ? 'Creating Doctor...' : 'Create Doctor'}
+                    </button>
+                </form>
             </div>
         </div>
     );
