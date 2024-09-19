@@ -1,6 +1,8 @@
 import { useState, useEffect } from 'react';
-import { Link } from 'react-router-dom';  // Import Link
+import { Link } from 'react-router-dom';  
 import { deleteUser as deleteUserApi, getUsers, createDoctor } from '../api';
+
+
 
 const AdminDashboard = () => {
     // State variables
@@ -74,6 +76,7 @@ const AdminDashboard = () => {
             setDoctorUsername('');
             setDoctorName('');
             setDoctorPassword('');
+          
         } catch (error) {
             let errorMessage = 'Failed to create doctor.';
             if (error.response && error.response.data) {
@@ -99,6 +102,7 @@ const AdminDashboard = () => {
         } finally {
             setCreatingDoctor(false);
         }
+        window.location.reload();
     };
 
     return (
@@ -106,7 +110,7 @@ const AdminDashboard = () => {
             <h2>Admin Dashboard</h2>
 
             {/* Display an error message if something goes wrong */}
-            {error && <p style={{ color: 'red' }}>{error}</p>}
+            {/* {error && <p style={{ color: 'red' }}>{error}</p>} */}
 
             {/* Show loading message while fetching users */}
             {loading ? (
