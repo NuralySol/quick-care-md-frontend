@@ -2,6 +2,7 @@ import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { login } from '../api';
 import { jwtDecode } from 'jwt-decode';
+import { Link } from 'react-router-dom';
 
 const Login = () => {
     const [username, setUsername] = useState('');
@@ -67,6 +68,9 @@ const Login = () => {
             <button type="submit" disabled={loading}>
                 {loading ? 'Logging in...' : 'Login'}
             </button>
+            <Link to="/">
+                    <button>Go to Home</button>
+                </Link>
         </form>
     );
 };
