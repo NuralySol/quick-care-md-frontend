@@ -101,26 +101,27 @@ const AdminDashboard = () => {
     return (
         <div style={{ display: 'flex' }}>
             {/* Sidebar */}
-            <div style={{ width: '250px', backgroundColor: '#f4f4f4', padding: '20px', height: '100vh' }}>
-                <h2>Admin Panel</h2>
-                <ul style={{ listStyle: 'none', padding: '0' }}>
-                    <li>
-                        <button style={{ width: '100%', padding: '10px', marginTop: '10px' }} onClick={() => setView('doctors')}>
-                            Doctors Panel
-                        </button>
-                    </li>
-                    <li style={{ marginTop: '20px' }}>
-                        <Link to="/login" style={{ textDecoration: 'none', color: 'black' }}>
-                            <button style={{ width: '100%', padding: '10px' }}>Login</button>
-                        </Link>
-                    </li>
-                    <li style={{ marginTop: '10px' }}>
-                        <Link to="/" style={{ textDecoration: 'none', color: 'black' }}>
-                            <button style={{ width: '100%', padding: '10px' }}>Back Home</button>
-                        </Link>
-                    </li>
-                </ul>
-            </div>
+            <div style={{ width: '250px', backgroundColor: '#87CEEB', padding: '20px', height: '100vh' }}>
+    <h2>Admin Panel</h2>
+    <ul style={{ listStyle: 'none', padding: '0' }}>
+        <li>
+            <button style={{ width: '100%', padding: '10px', marginTop: '10px' }} onClick={() => setView('doctors')}>
+                Doctors Panel
+            </button>
+        </li>
+        <li style={{ marginTop: '20px' }}>
+            <Link to="/login" style={{ textDecoration: 'none', color: 'black' }}>
+                <button style={{ width: '100%', padding: '10px' }}>Login</button>
+            </Link>
+        </li>
+        <li style={{ marginTop: '10px' }}>
+            <Link to="/" style={{ textDecoration: 'none', color: 'black' }}>
+                <button style={{ width: '100%', padding: '10px' }}>Back Home</button>
+            </Link>
+        </li>
+    </ul>
+</div>
+
 
             {/* Main Content */}
             <div>
