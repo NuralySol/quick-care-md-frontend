@@ -1,4 +1,5 @@
 import { useState, useEffect } from 'react';
+import { Link } from 'react-router-dom';  // Import Link
 import { deleteUser as deleteUserApi, getUsers, createDoctor } from '../api';
 
 const AdminDashboard = () => {
@@ -172,6 +173,16 @@ const AdminDashboard = () => {
                     {creatingDoctor ? 'Creating Doctor...' : 'Create Doctor'}
                 </button>
             </form>
+
+            {/* Navigation buttons */}
+            <div style={{ marginTop: '20px' }}>
+                <Link to="/">
+                    <button>Go to Home</button>
+                </Link>
+                <Link to="/login" style={{ marginLeft: '10px' }}>
+                    <button>Go to Login</button>
+                </Link>
+            </div>
         </div>
     );
 };
