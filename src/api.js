@@ -93,9 +93,20 @@ export const createDoctor = async (data) => {
 export const updateDoctor = (id, data) => api.put(`/doctors/${id}/`, data, { headers: getAuthHeaders() });
 export const deleteDoctor = (id) => api.delete(`/doctors/${id}/`, { headers: getAuthHeaders() });
 
+// Fire a doctor through an admin
+export const fireDoctor = (id) => api.post(`/doctors/${id}/fire/`, {}, { headers: getAuthHeaders() });
+
 // Patients API
 export const getPatients = () => api.get('/patients/', { headers: getAuthHeaders() });
 export const getPatient = (id) => api.get(`/patients/${id}/`, { headers: getAuthHeaders() });
+// Discharge a patient
+export const dischargePatient = async (patientId) => {
+    return api.post(`/patients/${patientId}/discharge/`, {}, { headers: getAuthHeaders() });
+};
 
 // Diseases API
 export const getDiseases = () => api.get('/diseases/', { headers: getAuthHeaders() });
+
+// Many to Many Relationship treatments options
+export const getTreatmentOptions = () => api.get('/treatments/options/', { headers: getAuthHeaders() });
+

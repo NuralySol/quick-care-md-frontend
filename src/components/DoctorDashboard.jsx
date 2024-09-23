@@ -1,24 +1,30 @@
 import { useEffect, useState } from 'react';
 import { useParams } from 'react-router-dom';
-import { getDoctor, createPatient, getDiseases, assignTreatment } from '../api.js';
+import { getDoctor, createPatient, getDiseases, assignTreatment, dischargePatient, getTreatmentOptions } from '../api.js';
 
+// DoctorDashboard Component
 const DoctorDashboard = () => {
     const [doctor, setDoctor] = useState(null);
     const [diseases, setDiseases] = useState([]);
     const [newPatientName, setNewPatientName] = useState('');
-    const [treatmentOptions, setTreatmentOptions] = useState('');
+    const [selectedDiseases, setSelectedDiseases] = useState([]);
+    const [treatmentOptionsList, setTreatmentOptionsList] = useState([]);
+    const [selectedTreatmentOption, setSelectedTreatmentOption] = useState('');
     const [selectedPatientId, setSelectedPatientId] = useState(null);
     const [error, setError] = useState('');
     const { id } = useParams();
 
+    // Fetch doctor and diseases on component mount
     useEffect(() => {
         const fetchDoctorAndDiseases = async () => {
             try {
                 const doctorResponse = await getDoctor(id);
-                console.log("Doctor response:", doctorResponse.data);
-                const diseaseResponse = await getDiseases();  
+                const diseaseResponse = await getDiseases();
+                const treatmentOptionsResponse = await getTreatmentOptions();
+
                 setDoctor(doctorResponse.data);
                 setDiseases(diseaseResponse.data);
+                setTreatmentOptionsList(treatmentOptionsResponse.data);  // Fetch and set available treatments
             } catch (error) {
                 console.error('Error fetching doctor or diseases:', error);
             }
@@ -27,91 +33,84 @@ const DoctorDashboard = () => {
         fetchDoctorAndDiseases();
     }, [id]);
 
-    // Randomly assign diseases to a new patient
-    const assignRandomDiseases = (diseaseList) => {
-        const numDiseases = Math.floor(Math.random() * 3) + 1;
-        const shuffledDiseases = diseaseList.sort(() => 0.5 - Math.random());
-        return shuffledDiseases.slice(0, numDiseases);
-    };
-
+    // Handle creating a new patient
     const handleCreatePatient = async (e) => {
         e.preventDefault();
         try {
-            // Assign random diseases
-            const randomDiseases = assignRandomDiseases(diseases);
-    
-            // Ensure that disease IDs are valid and log them for debugging
-            const diseaseIds = randomDiseases.map(disease => {
-                if (disease && disease.disease_id) {  // Use disease.disease_id
-                    return disease.disease_id;
-                } else {
-                    console.error("Invalid disease detected:", disease);  // Log if any invalid disease exists
-                    return null;
-                }
-            }).filter(id => id !== null);  // Filter out any invalid IDs (null values)
-    
-            // If no valid disease IDs are present, handle it gracefully
-            if (diseaseIds.length === 0) {
-                setError('No valid diseases selected for the patient.');
-                return;
-            }
-    
+            // Filter selected disease objects from the diseases list
+            const diseaseObjects = diseases.filter(disease => selectedDiseases.includes(disease.disease_id));
+
             const patientData = {
                 name: newPatientName,
                 doctor: doctor.id,
-                disease: diseaseIds  // Send random diseases with the patient creation request
+                disease: diseaseObjects,  // Pass full disease objects
             };
-    
-            console.log("Patient data being sent to API:", patientData);
-    
-            // Send API request to create patient
+
+            console.log("Creating patient with data:", patientData);  // Log the patient data
+
             const response = await createPatient(patientData);
-    
             alert(`Patient ${response.data.name} created successfully!`);
-            console.log("Patient created successfully:", response.data);
-    
-            // Fetch the updated doctor and patients data after creating the patient
+
             const updatedDoctorResponse = await getDoctor(id);
             setDoctor(updatedDoctorResponse.data);
-    
             setNewPatientName('');
+            setSelectedDiseases([]); // Clear the selected diseases after patient creation
         } catch (error) {
             setError('Failed to create patient.');
             console.error('Failed to create patient:', error);
         }
     };
 
-    // Select a random treatment
-    const assignRandomTreatment = () => {
-        const randomIndex = Math.floor(Math.random() * valid_treatments.length);
-        return valid_treatments[randomIndex];
-    };
-
-    // Handle treatment assignment
+    // Handle assigning a treatment to a patient
     const handleAssignTreatment = async (e) => {
         e.preventDefault();
         try {
-            const randomTreatment = assignRandomTreatment();  // Get a random treatment
-
             const treatmentData = {
-                treatment_id: randomTreatment.treatment_id,  // Use treatment_id
-                treatment_options: randomTreatment.treatment_options,
-                doctor: doctor.id,
-                patient: selectedPatientId,
+                treatment_options: selectedTreatmentOption,  // Selected treatment
+                doctor: doctor.id,  // Doctor ID
+                patient: selectedPatientId,  // Selected patient ID
             };
 
-            console.log("Treatment data being sent:", treatmentData);
-
-            // Send API request to assign treatment
             const response = await assignTreatment(treatmentData);
-            alert('Treatment assigned successfully!');
-            console.log("Assigned treatment:", response.data);
 
-            setTreatmentOptions('');
+            if (response.data.success) {
+                alert('Valid Treatment assigned successfully!');
+            } else {
+                alert('Invalid Treatment assigned!');
+            }
+
+            setSelectedTreatmentOption(''); // Reset selection after assignment
         } catch (error) {
             setError('Failed to assign treatment.');
-            console.error('Failed to assign treatment:', error);
+            console.error('Failed to assign treatment:', error.response?.data);
         }
+    };
+
+    // Handle discharging a patient and removing them from the view
+    const handleDischargePatient = async (patientId) => {
+        try {
+            const response = await dischargePatient(patientId);
+            alert(`Patient ${response.data.discharge.patient.name} has been successfully discharged.`);
+
+            // Filter out the discharged patient from the doctor.patients array
+            const updatedPatients = doctor.patients.filter(patient => patient.id !== patientId);
+            setDoctor(prevDoctor => ({ ...prevDoctor, patients: updatedPatients }));
+        } catch (error) {
+            setError('Failed to discharge patient.');
+            console.error('Error discharging patient:', error);
+        }
+    };
+
+    // Handle disease selection
+    const handleDiseaseSelection = (e) => {
+        const options = e.target.options;
+        const selected = [];
+        for (let i = 0; i < options.length; i++) {
+            if (options[i].selected) {
+                selected.push(Number(options[i].value)); // Collect selected disease IDs
+            }
+        }
+        setSelectedDiseases(selected); // Update state
     };
 
     if (!doctor) {
@@ -125,30 +124,40 @@ const DoctorDashboard = () => {
 
             <h4>Patients:</h4>
             <ul>
-                {doctor.patient_set && doctor.patient_set.map((patient) => (
-                    <li key={patient.id}>
-                        {patient.name} (Admitted: {new Date(patient.time_admitted).toLocaleDateString()})
-                        <ul>
-                            <li>Diseases:
-                                <ul>
-                                    {patient.disease && patient.disease.map((disease) => (
-                                        <li key={disease.disease_id}>  {/* Use disease.disease_id */}
-                                            {disease.name} - Terminal: {disease.is_terminal ? 'Yes' : 'No'}
-                                        </li>
-                                    ))}
-                                </ul>
-                            </li>
-                            <li>
-                                <button onClick={() => setSelectedPatientId(patient.id)}>
-                                    Assign Treatment
-                                </button>
-                            </li>
-                        </ul>
-                    </li>
-                ))}
+                {doctor.patients && doctor.patients
+                    .map((patient) => (
+                        <li key={patient.id}>
+                            <strong>{patient.name}</strong> (Admitted: {new Date(patient.time_admitted).toLocaleDateString()})
+                            <ul>
+                                <li><strong>Diseases:</strong>
+                                    <ul>
+                                        {patient.disease && patient.disease.map((disease) => (
+                                            <li key={disease.disease_id}>
+                                                {disease.name} - Terminal: {disease.is_terminal ? 'Yes' : 'No'}
+                                                <ul>
+                                                    {patient.treatments?.filter(treatment => treatment.disease?.disease_id === disease.disease_id).map(treatment => (
+                                                        <li key={treatment.treatment_id}>
+                                                            Treatment: {treatment.treatment_options} - Success: {treatment.success ? 'Yes' : 'No'}
+                                                        </li>
+                                                    ))}
+                                                </ul>
+                                            </li>
+                                        ))}
+                                    </ul>
+                                </li>
+                                <li>
+                                    <button onClick={() => setSelectedPatientId(patient.id)}>
+                                        Assign Treatment
+                                    </button>
+                                    <button onClick={() => handleDischargePatient(patient.id)}>
+                                        Discharge Patient
+                                    </button>
+                                </li>
+                            </ul>
+                        </li>
+                    ))}
             </ul>
 
-            {/* Create a new patient form */}
             <h3>Create a New Patient</h3>
             <form onSubmit={handleCreatePatient}>
                 <label>Patient Name:</label>
@@ -158,27 +167,38 @@ const DoctorDashboard = () => {
                     onChange={(e) => setNewPatientName(e.target.value)}
                     required
                 />
+                <select multiple={true} value={selectedDiseases} onChange={handleDiseaseSelection}>
+                    {diseases.map(disease => (
+                        <option key={disease.disease_id} value={disease.disease_id}>
+                            {disease.name}
+                        </option>
+                    ))}
+                </select>
                 <button type="submit">Create Patient</button>
             </form>
 
-            {/* Assign treatment to the selected patient */}
             {selectedPatientId && (
                 <div>
                     <h3>Assign Treatment</h3>
                     <form onSubmit={handleAssignTreatment}>
                         <label>Treatment Options:</label>
-                        <input
-                            type="text"
-                            value={treatmentOptions}
-                            onChange={(e) => setTreatmentOptions(e.target.value)}
+                        <select
+                            value={selectedTreatmentOption}
+                            onChange={(e) => setSelectedTreatmentOption(e.target.value)}
                             required
-                        />
+                        >
+                            <option value="">Select Treatment</option>
+                            {treatmentOptionsList.map((option, index) => (
+                                <option key={index} value={option}>
+                                    {option}
+                                </option>
+                            ))}
+                        </select>
                         <button type="submit">Assign Treatment</button>
                     </form>
                 </div>
             )}
 
-            {/* Show error messages */}
             {error && <p style={{ color: 'red' }}>{error}</p>}
         </div>
     );
