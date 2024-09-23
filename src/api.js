@@ -6,10 +6,18 @@ const api = axios.create({
 
 const getAuthHeaders = () => {
     const token = localStorage.getItem('access_token');
-    console.log("Access token:", token);  // Log the token to check if it exists
+    console.log("Fetched Access Token from localStorage:", token);  // Check if the token is fetched correctly
     return token ? { Authorization: `Bearer ${token}` } : {};
 };
+// Many to Many Relationship
+export const assignTreatment = async (treatmentData) => {
+    return api.post(`/treatments/`, treatmentData, { headers: getAuthHeaders() });
+};
 
+// Create a new patient
+export const createPatient = async (patientData) => {
+    return api.post('/patients/', patientData, { headers: getAuthHeaders() });
+};
 // Create Admin
 export const createAdmin = async (credentials) => {
     return await api.post('/users/register/', {
@@ -79,7 +87,7 @@ export const getUsers = () => api.get('/users/', { headers: getAuthHeaders() });
 export const getDoctors = () => api.get('/doctors/', { headers: getAuthHeaders() });
 export const getDoctor = (id) => api.get(`/doctors/${id}/`, { headers: getAuthHeaders() });
 export const createDoctor = async (data) => {
-    console.log("Doctor data being sent to API:", data);  // Add log here
+    console.log("Doctor data being sent to API:", data);  
     return api.post('/doctors/', data, { headers: getAuthHeaders() });
 };
 export const updateDoctor = (id, data) => api.put(`/doctors/${id}/`, data, { headers: getAuthHeaders() });

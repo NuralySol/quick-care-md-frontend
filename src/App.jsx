@@ -21,8 +21,8 @@ const App = () => {
                 </PrivateRoute>
             } />
 
-            {/* Doctor dashboard: only accessible to 'doctor' role */}
-            <Route path="/doctor/dashboard" element={
+            {/* Doctor dashboard with dynamic user_id */}
+            <Route path="/doctor/dashboard/:id" element={
                 <PrivateRoute allowedRoles={['doctor']}>
                     <DoctorDashboard />
                 </PrivateRoute>

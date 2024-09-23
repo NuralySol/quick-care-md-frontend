@@ -16,7 +16,7 @@ const Signup = () => {
         try {
             await createAdmin({ username, password });  // Create an admin request
             setMessage({ text: 'Admin account created successfully. Please log in.', severity: 'success' });
-            setTimeout(() => navigate('/login'), 2000); // Redirect after showing message
+            setTimeout(() => navigate('/login'), 1000); // Redirect after showing message
         } catch (error) {
             const errorMessage = error.response?.data?.detail || 'Signup failed. Please try again.';
             setMessage({ text: errorMessage, severity: 'error' });
