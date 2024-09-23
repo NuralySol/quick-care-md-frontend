@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
-import { deleteUser as deleteUserApi, getUsers, createDoctor, getDischargedPatients, deletePatient } from '../api';
+import { deleteUser as deleteUserApi, getUsers, createDoctor, getDischargedPatients, purgeAllDischargedPatients } from '../api';
 
 const AdminDashboard = () => {
     const [users, setUsers] = useState([]);
@@ -49,16 +49,16 @@ const AdminDashboard = () => {
         }
     };
 
-    // Handle deleting a patient by their name
-    const handleDeletePatient = async (patientName) => {
-        if (window.confirm('Are you sure you want to delete this patient?')) {
+    // Purge all discharged patients at once
+    const handlePurgeAllDischargedPatients = async () => {
+        if (window.confirm('Are you sure you want to delete all discharged patients? This action cannot be undone.')) {
             try {
-                await deletePatient(patientName);  // Call the API to delete the patient by name
-                alert('Patient deleted successfully.');
+                await purgeAllDischargedPatients();
+                alert('All discharged patients deleted successfully.');
                 fetchDischargedPatients();  // Refresh the list of discharged patients
             } catch (error) {
-                setError('Failed to delete patient.');
-                console.error('Failed to delete patient:', error);
+                setError('Failed to delete all discharged patients.');
+                console.error('Failed to delete all discharged patients:', error);
             }
         }
     };
@@ -93,7 +93,7 @@ const AdminDashboard = () => {
         e.preventDefault();
         setCreatingDoctor(true);
         setError('');
-
+    
         try {
             const doctorData = {
                 name: doctorName,
@@ -103,40 +103,31 @@ const AdminDashboard = () => {
                     role: 'doctor',
                 },
             };
-
+    
             await createDoctor(doctorData);
             alert('Doctor created successfully.');
-            fetchUsers();
+    
+            // Clear the form
             setDoctorUsername('');
             setDoctorName('');
             setDoctorPassword('');
+    
+            // Force refresh the page after 0.2 seconds
+            setTimeout(() => {
+                window.location.reload();
+            }, 200);
         } catch (error) {
-            let errorMessage = 'Failed to create doctor.';
-            if (error.response && error.response.data) {
-                const extractErrorMessages = (errorData) => {
-                    let messages = [];
-                    for (const [field, value] of Object.entries(errorData)) {
-                        if (Array.isArray(value)) {
-                            messages.push(`${field}: ${value.join(', ')}`);
-                        } else if (typeof value === 'object' && value !== null) {
-                            const nestedMessages = extractErrorMessages(value);
-                            messages.push(`${field}: ${nestedMessages}`);
-                        } else {
-                            messages.push(`${field}: ${value}`);
-                        }
-                    }
-                    return messages.join(' | ');
-                };
-                errorMessage = extractErrorMessages(error.response.data);
-            }
-            setError(errorMessage);
             console.error('Failed to create doctor:', error);
+    
+            // Even if there's an error, force the page to reload
+            setTimeout(() => {
+                window.location.reload();
+            }, 200);
         } finally {
             setCreatingDoctor(false);
-            window.location.reload();
         }
     };
-
+    
     return (
         <div style={{ padding: '20px' }}>
             <h2>Admin Dashboard</h2>
@@ -249,40 +240,40 @@ const AdminDashboard = () => {
 
             <h3 style={{ marginTop: '30px' }}>Discharged Patients</h3>
             {dischargedPatients.length > 0 ? (
-                <table style={{ width: '100%', borderCollapse: 'collapse', marginTop: '10px' }}>
-                    <thead>
-                        <tr>
-                            <th style={{ border: '1px solid black', padding: '8px' }}>Patient Name</th>
-                            <th style={{ border: '1px solid black', padding: '8px' }}>Discharge Date</th>
-                            <th style={{ border: '1px solid black', padding: '8px' }}>Doctor</th>
-                            <th style={{ border: '1px solid black', padding: '8px' }}>Action</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        {dischargedPatients.map((patient) => (
-                            <tr key={patient.discharge_id}>
-                                <td style={{ border: '1px solid black', padding: '8px' }}>{patient.patient_name}</td>
-                                <td style={{ border: '1px solid black', padding: '8px' }}>{new Date(patient.discharge_date).toLocaleDateString()}</td>
-                                <td style={{ border: '1px solid black', padding: '8px' }}>{patient.doctor_name}</td>
-                                <td style={{ border: '1px solid black', padding: '8px' }}>
-                                    <button
-                                        onClick={() => handleDeletePatient(patient.discharge_id)}
-                                        style={{
-                                            backgroundColor: '#e74c3c',
-                                            color: 'white',
-                                            padding: '8px 12px',
-                                            border: 'none',
-                                            borderRadius: '4px',
-                                            cursor: 'pointer',
-                                        }}
-                                    >
-                                        Delete Patient
-                                    </button>
-                                </td>
+                <div>
+                    <table style={{ width: '100%', borderCollapse: 'collapse', marginTop: '10px' }}>
+                        <thead>
+                            <tr>
+                                <th style={{ border: '1px solid black', padding: '8px' }}>Patient Name</th>
+                                <th style={{ border: '1px solid black', padding: '8px' }}>Discharge Date</th>
+                                <th style={{ border: '1px solid black', padding: '8px' }}>Doctor</th>
                             </tr>
-                        ))}
-                    </tbody>
-                </table>
+                        </thead>
+                        <tbody>
+                            {dischargedPatients.map((patient) => (
+                                <tr key={patient.discharge_id}>
+                                    <td style={{ border: '1px solid black', padding: '8px' }}>{patient.patient_name}</td>
+                                    <td style={{ border: '1px solid black', padding: '8px' }}>{new Date(patient.discharge_date).toLocaleDateString()}</td>
+                                    <td style={{ border: '1px solid black', padding: '8px' }}>{patient.doctor_name}</td>
+                                </tr>
+                            ))}
+                        </tbody>
+                    </table>
+                    <button
+                        onClick={handlePurgeAllDischargedPatients}
+                        style={{
+                            marginTop: '20px',
+                            backgroundColor: '#e74c3c',
+                            color: 'white',
+                            padding: '10px 20px',
+                            border: 'none',
+                            borderRadius: '4px',
+                            cursor: 'pointer',
+                        }}
+                    >
+                        Purge All Discharged Patients
+                    </button>
+                </div>
             ) : (
                 <p>No discharged patients available.</p>
             )}

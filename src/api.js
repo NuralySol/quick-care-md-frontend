@@ -82,6 +82,11 @@ export const deletePatient = (id) => api.delete(`/patients/${id}/`, { headers: g
 // Discharge-related APIs
 export const getDischargedPatients = async () => api.get('/discharges/', { headers: getAuthHeaders() });
 export const dischargePatient = async (patientId) => api.post(`/patients/${patientId}/discharge/`, {}, { headers: getAuthHeaders() });
+// Add this to your api.js or equivalent file
+export const purgeAllDischargedPatients = async () => {
+    return api.delete(`/patients/discharged/purge/`, { headers: getAuthHeaders() });
+};
+
 
 // Disease-related APIs
 export const getDiseases = () => api.get('/diseases/', { headers: getAuthHeaders() });
