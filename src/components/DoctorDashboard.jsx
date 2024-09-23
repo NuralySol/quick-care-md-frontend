@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react';
 import { useParams } from 'react-router-dom';
-import { getDoctor, createPatient, getDiseases, assignTreatment, dischargePatient, getTreatmentOptions } from '../api.js';
+import { getDoctor, createPatient, getDiseases, assignTreatment, dischargePatient, getTreatmentOptions, getDischargedPatients } from '../api.js';
 
 // DoctorDashboard Component
 const DoctorDashboard = () => {
@@ -11,6 +11,7 @@ const DoctorDashboard = () => {
     const [treatmentOptionsList, setTreatmentOptionsList] = useState([]);
     const [selectedTreatmentOption, setSelectedTreatmentOption] = useState('');
     const [selectedPatientId, setSelectedPatientId] = useState(null);
+    const [dischargedPatients, setDischargedPatients] = useState([]); // For discharged patients
     const [error, setError] = useState('');
     const { id } = useParams();
 
@@ -21,10 +22,12 @@ const DoctorDashboard = () => {
                 const doctorResponse = await getDoctor(id);
                 const diseaseResponse = await getDiseases();
                 const treatmentOptionsResponse = await getTreatmentOptions();
+                const dischargedPatientsResponse = await getDischargedPatients();
 
                 setDoctor(doctorResponse.data);
                 setDiseases(diseaseResponse.data);
                 setTreatmentOptionsList(treatmentOptionsResponse.data);  // Fetch and set available treatments
+                setDischargedPatients(dischargedPatientsResponse.data);  // Set discharged patients
             } catch (error) {
                 console.error('Error fetching doctor or diseases:', error);
             }
@@ -37,24 +40,22 @@ const DoctorDashboard = () => {
     const handleCreatePatient = async (e) => {
         e.preventDefault();
         try {
-            // Filter selected disease objects from the diseases list
             const diseaseObjects = diseases.filter(disease => selectedDiseases.includes(disease.disease_id));
 
             const patientData = {
                 name: newPatientName,
                 doctor: doctor.id,
-                disease: diseaseObjects,  // Pass full disease objects
+                disease: diseaseObjects,
             };
-
-            console.log("Creating patient with data:", patientData);  // Log the patient data
 
             const response = await createPatient(patientData);
             alert(`Patient ${response.data.name} created successfully!`);
 
+            // Re-fetch the doctor to update the patient list
             const updatedDoctorResponse = await getDoctor(id);
-            setDoctor(updatedDoctorResponse.data);
+            setDoctor(updatedDoctorResponse.data);  // Update doctor with new patient list
             setNewPatientName('');
-            setSelectedDiseases([]); // Clear the selected diseases after patient creation
+            setSelectedDiseases([]);
         } catch (error) {
             setError('Failed to create patient.');
             console.error('Failed to create patient:', error);
@@ -90,11 +91,19 @@ const DoctorDashboard = () => {
     const handleDischargePatient = async (patientId) => {
         try {
             const response = await dischargePatient(patientId);
-            alert(`Patient ${response.data.discharge.patient.name} has been successfully discharged.`);
+            const dischargedPatient = response.data.discharge;
 
-            // Filter out the discharged patient from the doctor.patients array
-            const updatedPatients = doctor.patients.filter(patient => patient.id !== patientId);
-            setDoctor(prevDoctor => ({ ...prevDoctor, patients: updatedPatients }));
+            if (dischargedPatient && dischargedPatient.discharged) {
+                alert(`Patient ${dischargedPatient.patient_name} has been successfully discharged.`);
+
+                // Re-fetch the doctor to update the patient list and move the discharged patient
+                const updatedDoctorResponse = await getDoctor(id);
+                const updatedDischargedPatients = await getDischargedPatients();
+                setDoctor(updatedDoctorResponse.data);  // Update doctor with only active patients
+                setDischargedPatients(updatedDischargedPatients.data);  // Update discharged patients
+            } else {
+                setError('Failed to discharge patient: Patient data missing.');
+            }
         } catch (error) {
             setError('Failed to discharge patient.');
             console.error('Error discharging patient:', error);
@@ -122,41 +131,74 @@ const DoctorDashboard = () => {
             <h2>Doctor Dashboard</h2>
             <strong>{doctor.name}</strong> - {doctor.specialty || 'General Doctor'}
 
-            <h4>Patients:</h4>
-            <ul>
-                {doctor.patients && doctor.patients
-                    .map((patient) => (
-                        <li key={patient.id}>
-                            <strong>{patient.name}</strong> (Admitted: {new Date(patient.time_admitted).toLocaleDateString()})
-                            <ul>
-                                <li><strong>Diseases:</strong>
+            <div style={{ display: 'flex', justifyContent: 'space-between' }}>
+                {/* Active Patients List */}
+                <div>
+                    <h4>Active Patients:</h4>
+                    <ul>
+                        {doctor.patients && doctor.patients
+                            .filter(patient => !patient.discharged)
+                            .map((patient) => (
+                                <li key={patient.id}>
+                                    <strong>{patient.name}</strong> (Admitted: {new Date(patient.time_admitted).toLocaleDateString()})
                                     <ul>
-                                        {patient.disease && patient.disease.map((disease) => (
-                                            <li key={disease.disease_id}>
-                                                {disease.name} - Terminal: {disease.is_terminal ? 'Yes' : 'No'}
-                                                <ul>
-                                                    {patient.treatments?.filter(treatment => treatment.disease?.disease_id === disease.disease_id).map(treatment => (
-                                                        <li key={treatment.treatment_id}>
-                                                            Treatment: {treatment.treatment_options} - Success: {treatment.success ? 'Yes' : 'No'}
-                                                        </li>
-                                                    ))}
-                                                </ul>
-                                            </li>
-                                        ))}
+                                        <li><strong>Diseases:</strong>
+                                            <ul>
+                                                {patient.disease && patient.disease.map((disease) => (
+                                                    <li key={disease.disease_id}>
+                                                        {disease.name} - Terminal: {disease.is_terminal ? 'Yes' : 'No'}
+                                                    </li>
+                                                ))}
+                                            </ul>
+                                        </li>
+                                        <li>
+                                            <button onClick={() => setSelectedPatientId(patient.id)}>
+                                                Assign Treatment
+                                            </button>
+                                            <button
+                                                onClick={() => handleDischargePatient(patient.id)}
+                                            >
+                                                Discharge Patient
+                                            </button>
+                                        </li>
                                     </ul>
                                 </li>
-                                <li>
-                                    <button onClick={() => setSelectedPatientId(patient.id)}>
-                                        Assign Treatment
-                                    </button>
-                                    <button onClick={() => handleDischargePatient(patient.id)}>
-                                        Discharge Patient
-                                    </button>
-                                </li>
-                            </ul>
-                        </li>
-                    ))}
-            </ul>
+                            ))}
+                    </ul>
+                </div>
+
+                {/* Discharged Patients List */}
+                <div>
+                    <h4>Discharged Patients:</h4>
+                    <ul>
+                        {dischargedPatients.map((patient) => (
+                            <li key={patient.id}>
+                                <strong>{patient.name}</strong> - Status: <em>Discharged</em>
+                                <ul>
+                                    <li><strong>Diseases:</strong>
+                                        <ul>
+                                            {patient.disease && patient.disease.map((disease) => (
+                                                <li key={disease.disease_id}>
+                                                    {disease.name} - Terminal: {disease.is_terminal ? 'Yes' : 'No'}
+                                                </li>
+                                            ))}
+                                        </ul>
+                                    </li>
+                                    <li><strong>Treatments Received:</strong>
+                                        <ul>
+                                            {patient.treatments?.map((treatment) => (
+                                                <li key={treatment.treatment_id}>
+                                                    {treatment.treatment_options} - Success: {treatment.success ? 'Yes' : 'No'}
+                                                </li>
+                                            ))}
+                                        </ul>
+                                    </li>
+                                </ul>
+                            </li>
+                        ))}
+                    </ul>
+                </div>
+            </div>
 
             <h3>Create a New Patient</h3>
             <form onSubmit={handleCreatePatient}>

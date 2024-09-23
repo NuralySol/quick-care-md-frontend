@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { login } from '../api';
-import  {jwtDecode}  from 'jwt-decode';  // Ensure proper import
+import  {jwtDecode}  from 'jwt-decode';  
 
 const Login = () => {
     const [username, setUsername] = useState('');

@@ -1,9 +1,8 @@
 import { useState, useEffect } from 'react';
-import { Link } from 'react-router-dom';  // Import Link
-import { deleteUser as deleteUserApi, getUsers, createDoctor } from '../api';
+import { Link } from 'react-router-dom';
+import { deleteUser as deleteUserApi, getUsers, createDoctor, getDischargedPatients, deletePatient } from '../api';
 
 const AdminDashboard = () => {
-    // State variables
     const [users, setUsers] = useState([]);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState('');
@@ -12,27 +11,25 @@ const AdminDashboard = () => {
     const [doctorName, setDoctorName] = useState('');
     const [doctorPassword, setDoctorPassword] = useState('');
     const [creatingDoctor, setCreatingDoctor] = useState(false);
-    const [currentUser, setCurrentUser] = useState(null);  // For storing the logged-in admin
-    const [showModal, setShowModal] = useState(false);  // State for showing the modal
+    const [currentUser, setCurrentUser] = useState(null);
+    const [showModal, setShowModal] = useState(false);
+    const [dischargedPatients, setDischargedPatients] = useState([]);
 
     useEffect(() => {
         fetchUsers();
+        fetchDischargedPatients();
     }, []);
 
-    // Function to fetch users from the backend
     const fetchUsers = async () => {
         setLoading(true);
         setError('');
         try {
             const response = await getUsers();
-
-            // Get the logged-in user and exclude superusers and users with no role
-            const username = localStorage.getItem('username');  // Assuming the username is stored in localStorage
+            const username = localStorage.getItem('username');
             const filteredUsers = response.data.filter(user => user.role && !user.is_superuser);
             const loggedInUser = response.data.find(user => user.username === username);
-
             setUsers(filteredUsers);
-            setCurrentUser(loggedInUser);  // Store the logged-in user
+            setCurrentUser(loggedInUser);
         } catch (error) {
             setError('Failed to fetch users.');
             console.error('Failed to fetch users:', error);
@@ -41,15 +38,37 @@ const AdminDashboard = () => {
         }
     };
 
+    const fetchDischargedPatients = async () => {
+        setError('');
+        try {
+            const response = await getDischargedPatients();
+            setDischargedPatients(response.data);
+        } catch (error) {
+            setError('Failed to fetch discharged patients.');
+            console.error('Failed to fetch discharged patients:', error);
+        }
+    };
+
+    // Handle deleting a patient by their name
+    const handleDeletePatient = async (patientName) => {
+        if (window.confirm('Are you sure you want to delete this patient?')) {
+            try {
+                await deletePatient(patientName);  // Call the API to delete the patient by name
+                alert('Patient deleted successfully.');
+                fetchDischargedPatients();  // Refresh the list of discharged patients
+            } catch (error) {
+                setError('Failed to delete patient.');
+                console.error('Failed to delete patient:', error);
+            }
+        }
+    };
+
     const handleDeactivateUser = async (userId) => {
-        // Check if the user is the logged-in admin and there are doctors present
         if (currentUser && userId === currentUser.id && users.some(user => user.role === 'doctor')) {
-            // Show modal if admin tries to deactivate themselves and doctors exist
             setShowModal(true);
             return;
         }
 
-        // Proceed with the deactivation if it's not the admin themselves
         if (window.confirm('Are you sure you want to deactivate this user?')) {
             setDeactivatingUserId(userId);
             setError('');
@@ -66,7 +85,6 @@ const AdminDashboard = () => {
         }
     };
 
-    // Function to close the modal
     const handleCloseModal = () => {
         setShowModal(false);
     };
@@ -75,7 +93,7 @@ const AdminDashboard = () => {
         e.preventDefault();
         setCreatingDoctor(true);
         setError('');
-        
+
         try {
             const doctorData = {
                 name: doctorName,
@@ -85,11 +103,10 @@ const AdminDashboard = () => {
                     role: 'doctor',
                 },
             };
-    
+
             await createDoctor(doctorData);
-    
             alert('Doctor created successfully.');
-            fetchUsers();  
+            fetchUsers();
             setDoctorUsername('');
             setDoctorName('');
             setDoctorPassword('');
@@ -116,7 +133,7 @@ const AdminDashboard = () => {
             console.error('Failed to create doctor:', error);
         } finally {
             setCreatingDoctor(false);
-            window.location.reload()
+            window.location.reload();
         }
     };
 
@@ -124,10 +141,8 @@ const AdminDashboard = () => {
         <div style={{ padding: '20px' }}>
             <h2>Admin Dashboard</h2>
 
-            {/* Display an error message if something goes wrong */}
             {error && <p style={{ color: 'red' }}>{error}</p>}
 
-            {/* Show loading message while fetching users */}
             {loading ? (
                 <p>Loading users...</p>
             ) : (
@@ -166,7 +181,6 @@ const AdminDashboard = () => {
                 </table>
             )}
 
-            {/* Form to create a new doctor */}
             <h3 style={{ marginTop: '30px' }}>Create a New Doctor</h3>
             <form onSubmit={handleCreateDoctor}>
                 <div style={{ marginBottom: '10px' }}>
@@ -233,7 +247,46 @@ const AdminDashboard = () => {
                 </div>
             )}
 
-            {/* Navigation buttons */}
+            <h3 style={{ marginTop: '30px' }}>Discharged Patients</h3>
+            {dischargedPatients.length > 0 ? (
+                <table style={{ width: '100%', borderCollapse: 'collapse', marginTop: '10px' }}>
+                    <thead>
+                        <tr>
+                            <th style={{ border: '1px solid black', padding: '8px' }}>Patient Name</th>
+                            <th style={{ border: '1px solid black', padding: '8px' }}>Discharge Date</th>
+                            <th style={{ border: '1px solid black', padding: '8px' }}>Doctor</th>
+                            <th style={{ border: '1px solid black', padding: '8px' }}>Action</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {dischargedPatients.map((patient) => (
+                            <tr key={patient.discharge_id}>
+                                <td style={{ border: '1px solid black', padding: '8px' }}>{patient.patient_name}</td>
+                                <td style={{ border: '1px solid black', padding: '8px' }}>{new Date(patient.discharge_date).toLocaleDateString()}</td>
+                                <td style={{ border: '1px solid black', padding: '8px' }}>{patient.doctor_name}</td>
+                                <td style={{ border: '1px solid black', padding: '8px' }}>
+                                    <button
+                                        onClick={() => handleDeletePatient(patient.discharge_id)}
+                                        style={{
+                                            backgroundColor: '#e74c3c',
+                                            color: 'white',
+                                            padding: '8px 12px',
+                                            border: 'none',
+                                            borderRadius: '4px',
+                                            cursor: 'pointer',
+                                        }}
+                                    >
+                                        Delete Patient
+                                    </button>
+                                </td>
+                            </tr>
+                        ))}
+                    </tbody>
+                </table>
+            ) : (
+                <p>No discharged patients available.</p>
+            )}
+
             <div style={{ marginTop: '20px' }}>
                 <Link to="/">
                     <button style={{ padding: '10px 20px', borderRadius: '4px', backgroundColor: '#3498db', color: 'white', border: 'none' }}>Go to Home</button>
