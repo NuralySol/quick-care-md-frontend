@@ -6,13 +6,14 @@ const api = axios.create({
 
 const getAuthHeaders = () => {
     const token = localStorage.getItem('access_token');
-    console.log("Access token:", token);  // Log the token to check if it exists
+    console.log("Fetched Access Token from localStorage:", token);  // Check if the token is fetched correctly
     return token ? { Authorization: `Bearer ${token}` } : {};
 };
-
-export const assignTreatment = async (patientId, treatmentData) => {
-    return api.post(`/patients/${patientId}/treatments/`, treatmentData, { headers: getAuthHeaders() });
+// Many to Many Relationship
+export const assignTreatment = async (treatmentData) => {
+    return api.post(`/treatments/`, treatmentData, { headers: getAuthHeaders() });
 };
+
 // Create a new patient
 export const createPatient = async (patientData) => {
     return api.post('/patients/', patientData, { headers: getAuthHeaders() });

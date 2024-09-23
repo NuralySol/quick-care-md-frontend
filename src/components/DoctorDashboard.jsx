@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react';
-import { useParams } from 'react-router-dom';  
-import { getDoctor, createPatient, getDiseases, assignTreatment } from '../api.js';  
+import { useParams } from 'react-router-dom';
+import { getDoctor, createPatient, getDiseases, assignTreatment } from '../api.js';
 
 const DoctorDashboard = () => {
     const [doctor, setDoctor] = useState(null);
@@ -9,15 +9,16 @@ const DoctorDashboard = () => {
     const [treatmentOptions, setTreatmentOptions] = useState('');
     const [selectedPatientId, setSelectedPatientId] = useState(null);
     const [error, setError] = useState('');
-    const { id } = useParams();  
+    const { id } = useParams();
 
     useEffect(() => {
         const fetchDoctorAndDiseases = async () => {
             try {
                 const doctorResponse = await getDoctor(id);
-                const diseaseResponse = await getDiseases();  // Fetch diseases from static API call
+                console.log("Doctor response:", doctorResponse.data);
+                const diseaseResponse = await getDiseases();  
                 setDoctor(doctorResponse.data);
-                setDiseases(diseaseResponse.data);  // Store diseases with treatments
+                setDiseases(diseaseResponse.data);
             } catch (error) {
                 console.error('Error fetching doctor or diseases:', error);
             }
@@ -28,30 +29,51 @@ const DoctorDashboard = () => {
 
     // Randomly assign diseases to a new patient
     const assignRandomDiseases = (diseaseList) => {
-        const numDiseases = Math.floor(Math.random() * 3) + 1;  // Randomly assign 1 to 3 diseases
+        const numDiseases = Math.floor(Math.random() * 3) + 1;
         const shuffledDiseases = diseaseList.sort(() => 0.5 - Math.random());
         return shuffledDiseases.slice(0, numDiseases);
     };
 
-    // Function to create a new patient and assign random diseases
     const handleCreatePatient = async (e) => {
         e.preventDefault();
         try {
-            const randomDiseases = assignRandomDiseases(diseases);  // Assign random diseases
-            const diseaseIds = randomDiseases.map(disease => disease.id);  // Get disease IDs
-
+            // Assign random diseases
+            const randomDiseases = assignRandomDiseases(diseases);
+    
+            // Ensure that disease IDs are valid and log them for debugging
+            const diseaseIds = randomDiseases.map(disease => {
+                if (disease && disease.disease_id) {  // Use disease.disease_id
+                    return disease.disease_id;
+                } else {
+                    console.error("Invalid disease detected:", disease);  // Log if any invalid disease exists
+                    return null;
+                }
+            }).filter(id => id !== null);  // Filter out any invalid IDs (null values)
+    
+            // If no valid disease IDs are present, handle it gracefully
+            if (diseaseIds.length === 0) {
+                setError('No valid diseases selected for the patient.');
+                return;
+            }
+    
             const patientData = {
                 name: newPatientName,
                 doctor: doctor.id,
-                diseases: diseaseIds,  // Send random diseases with the patient creation request
+                disease: diseaseIds  // Send random diseases with the patient creation request
             };
-
+    
+            console.log("Patient data being sent to API:", patientData);
+    
+            // Send API request to create patient
             const response = await createPatient(patientData);
+    
             alert(`Patient ${response.data.name} created successfully!`);
-            setDoctor((prevDoctor) => ({
-                ...prevDoctor,
-                patient_set: [...prevDoctor.patient_set, response.data]
-            }));
+            console.log("Patient created successfully:", response.data);
+    
+            // Fetch the updated doctor and patients data after creating the patient
+            const updatedDoctorResponse = await getDoctor(id);
+            setDoctor(updatedDoctorResponse.data);
+    
             setNewPatientName('');
         } catch (error) {
             setError('Failed to create patient.');
@@ -59,15 +81,32 @@ const DoctorDashboard = () => {
         }
     };
 
-    // Function to assign treatment to a patient
+    // Select a random treatment
+    const assignRandomTreatment = () => {
+        const randomIndex = Math.floor(Math.random() * valid_treatments.length);
+        return valid_treatments[randomIndex];
+    };
+
+    // Handle treatment assignment
     const handleAssignTreatment = async (e) => {
         e.preventDefault();
         try {
-            const response = await assignTreatment(selectedPatientId, {
-                treatment_options: treatmentOptions,
+            const randomTreatment = assignRandomTreatment();  // Get a random treatment
+
+            const treatmentData = {
+                treatment_id: randomTreatment.treatment_id,  // Use treatment_id
+                treatment_options: randomTreatment.treatment_options,
                 doctor: doctor.id,
-            });
+                patient: selectedPatientId,
+            };
+
+            console.log("Treatment data being sent:", treatmentData);
+
+            // Send API request to assign treatment
+            const response = await assignTreatment(treatmentData);
             alert('Treatment assigned successfully!');
+            console.log("Assigned treatment:", response.data);
+
             setTreatmentOptions('');
         } catch (error) {
             setError('Failed to assign treatment.');
@@ -93,7 +132,7 @@ const DoctorDashboard = () => {
                             <li>Diseases:
                                 <ul>
                                     {patient.disease && patient.disease.map((disease) => (
-                                        <li key={disease.id}>
+                                        <li key={disease.disease_id}>  {/* Use disease.disease_id */}
                                             {disease.name} - Terminal: {disease.is_terminal ? 'Yes' : 'No'}
                                         </li>
                                     ))}

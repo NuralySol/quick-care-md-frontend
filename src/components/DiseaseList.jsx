@@ -18,7 +18,7 @@ const DiseaseList = () => {
             <h2>Disease List</h2>
             <ul>
                 {diseases.map((disease) => (
-                    <li key={disease.id}>{disease.name}</li>
+                    <li key={disease_id}>{disease.name}</li>
                 ))}
             </ul>
         </div>
