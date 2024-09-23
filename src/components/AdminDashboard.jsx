@@ -99,11 +99,20 @@ const AdminDashboard = () => {
     };
 
     return (
-        <div style={{ display: 'flex' }}>
+        <div>
             {/* Sidebar */}
-            <div style={{ width: '250px', backgroundColor: '#f4f4f4', padding: '20px', height: '100vh' }}>
+            <div style={{
+                width: '300px',
+                backgroundColor: '#FFC0CB',
+                padding: '20px',
+                position: 'fixed',
+                top: '0',
+                left: '0',
+                height: '100vh', 
+                boxSizing: 'border-box',
+            }}>
                 <h2>Admin Panel</h2>
-                <ul style={{ listStyle: 'none', padding: '0' }}>
+                <ul style={{ listStyle: 'none', padding: '0', }}>
                     <li>
                         <button style={{ width: '100%', padding: '10px', marginTop: '10px' }} onClick={() => setView('doctors')}>
                             Doctors Panel
@@ -123,13 +132,13 @@ const AdminDashboard = () => {
             </div>
 
             {/* Main Content */}
-            <div>
-                <h1>Doctors Panel</h1>
+            <div style={{ marginLeft: '320px', padding: '20px' }}>
+                <h1 style={{ textAlign: 'center', fontSize: '50px', fontWeight: 'bold', color: '#008000' }}>Doctors Panel</h1>
 
                 {loading ? (
-                    <p>Loading doctors...</p>
+                    <p style={{ textAlign: 'center' }}>Loading doctors...</p>
                 ) : (
-                    <table>
+                    <table style={{ width: '50%', margin: '0 auto', textAlign: 'center', borderCollapse: 'collapse', fontSize: '20..px' }}>
                         <thead>
                             <tr>
                                 <th>Username</th>
@@ -158,33 +167,36 @@ const AdminDashboard = () => {
                     </table>
                 )}
 
-                <h3>Create a New Doctor</h3>
-                <form onSubmit={handleCreateDoctor}>
-                    <div>
+                <h3 style={{ textAlign: 'center', marginTop: '30px' }}>Create a New Doctor</h3>
+                <form onSubmit={handleCreateDoctor} style={{ width: '50%', margin: '0 auto', textAlign: 'center' }}>
+                    <div style={{ marginBottom: '10px' }}>
                         <label>Username:</label>
                         <input
                             type="text"
                             value={doctorUsername}
                             onChange={(e) => setDoctorUsername(e.target.value)}
                             required
+                            style={{ marginLeft: '10px' }}
                         />
                     </div>
-                    <div>
+                    <div style={{ marginBottom: '10px' }}>
                         <label>Name:</label>
                         <input
                             type="text"
                             value={doctorName}
                             onChange={(e) => setDoctorName(e.target.value)}
                             required
+                            style={{ marginLeft: '10px' }}
                         />
                     </div>
-                    <div>
+                    <div style={{ marginBottom: '10px' }}>
                         <label>Password:</label>
                         <input
                             type="password"
                             value={doctorPassword}
                             onChange={(e) => setDoctorPassword(e.target.value)}
                             required
+                            style={{ marginLeft: '10px' }}
                         />
                     </div>
                     <button type="submit" disabled={creatingDoctor}>

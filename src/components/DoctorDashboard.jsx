@@ -35,32 +35,32 @@ const DoctorDashboard = () => {
         
         doctorDashboardTitle: {
             position: 'absolute',
-            left: '63%',
+            left: '58%',
             transform: 'translateX(-50%)', 
             fontSize: '18px',
             fontWeight: 'bold',
             color: '#333',
-            marginTop: '40px',
+            marginTop: '53px',
            
         },
         quickCareTitle: {
             position: 'absolute',
             right: '400px', 
-            fontSize: '30px',
+            fontSize: '50px',
             fontWeight: 'bold',
             color: '#008000', 
 
             
         },
         sidebar: {
-            display: 'flex',
-            flexDirection: 'column',
-            justifyContent: 'space-between', 
             width: '300px',
-            borderRight: '1px solid #ddd',
+            backgroundColor: '#FFC0CB',
             padding: '20px',
-            backgroundColor: '#FFC0CB', 
-            height: '100vh',
+            position: 'fixed',
+            top: '0',
+            left: '0',
+            height: '100vh', // Full height
+            boxSizing: 'border-box' // 
         },
         sidebarList: {
             display: 'flex',
