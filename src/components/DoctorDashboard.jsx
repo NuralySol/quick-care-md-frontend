@@ -19,7 +19,7 @@ const reducer = (state, action) => {
             return {
                 ...state,
                 doctor: action.payload.doctor,
-                activePatients: action.payload.doctor.patients.filter(patient => !patient.discharged), // Only active patients
+                activePatients: action.payload.doctor.patients.filter(patient => !patient.discharged),
             };
         case 'FETCH_DISCHARGED_PATIENTS':
             return {
@@ -104,6 +104,7 @@ const DoctorDashboard = () => {
                 });
             } catch (error) {
                 dispatch({ type: 'SET_ERROR', payload: { error: 'Error fetching data' } });
+                console.error('Error fetching data:', error);
             }
         };
 
@@ -129,6 +130,7 @@ const DoctorDashboard = () => {
             setSelectedDiseases([]);
         } catch (error) {
             dispatch({ type: 'SET_ERROR', payload: { error: 'Failed to create patient' } });
+            console.error('Failed to create patient:', error);
         }
     };
 
@@ -154,6 +156,7 @@ const DoctorDashboard = () => {
             });
         } catch (error) {
             dispatch({ type: 'SET_ERROR', payload: { error: 'Failed to discharge patient' } });
+            console.error('Failed to discharge patient:', error);
         }
     };
 
@@ -179,6 +182,7 @@ const DoctorDashboard = () => {
             setSelectedTreatmentOption('');
         } catch (error) {
             dispatch({ type: 'SET_ERROR', payload: { error: 'Failed to assign treatment' } });
+            console.error('Failed to assign treatment:', error);
         }
     };
 
