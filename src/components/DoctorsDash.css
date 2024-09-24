@@ -1,0 +1,107 @@
+/* Doctor Dashboard Container */
+.dashboard-container {
+    padding: 20px;
+    height: 100%;
+    width: 800px;
+    margin: 0 auto;
+    background-color: #f9f9f9;
+    border-radius: 8px;
+}
+
+.dashboard-container h2 {
+    text-align: center;
+    color: #333;
+}
+
+.dashboard-container div {
+    margin-bottom: 20px;
+}
+
+.dashboard-container ul {
+    list-style: none;
+    padding: 0;
+}
+
+.dashboard-container li {
+    margin-bottom: 10px;
+    padding: 10px;
+    background-color: #fff;
+    border-radius: 5px;
+    box-shadow: 0 1px 4px rgba(0, 0, 0, 0.1);
+}
+
+/* Section Headers */
+h4 {
+    border-bottom: 2px solid #007bff;
+    padding-bottom: 5px;
+    margin-bottom: 10px;
+}
+
+/* Buttons */
+.dashboard-container button {
+    padding: 10px 15px;
+    background-color: #007bff;
+    border: none;
+    color: rgb(255, 255, 255);
+    border-radius: 4px;
+    cursor: pointer;
+    transition: background-color 0.3s ease;
+}
+
+button:hover {
+    background-color: #0056b3;
+}
+
+button:disabled {
+    background-color: #ccc;
+    cursor: not-allowed;
+}
+
+/* Form Styles */
+form {
+    display: flex;
+    flex-direction: column;
+    max-width: 400px;
+    margin: 20px 0;
+}
+
+input, select {
+    margin-bottom: 15px;
+    padding: 10px;
+    border-radius: 4px;
+    border: 1px solid #ccc;
+}
+
+select[multiple] {
+    height: 100px;
+}
+
+label {
+    font-weight: bold;
+}
+
+/* Patient Lists */
+.active-patients, .discharged-patients {
+    width: 48%;
+}
+
+.active-patients ul, .discharged-patients ul {
+    max-height: 400px;
+    overflow-y: auto;
+    border: 1px solid #ccc;
+    padding: 10px;
+    background-color: #fafafa;
+    border-radius: 5px;
+}
+
+.dashboard-container ul ul {
+    list-style-type: disc;
+    margin-left: 20px;
+}
+
+/* Error Message */
+.error-message {
+    color: red;
+    font-weight: bold;
+    margin-top: 10px;
+}

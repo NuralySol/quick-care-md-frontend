@@ -1,6 +1,7 @@
 import { useEffect, useReducer, useState } from 'react';
 import { useParams } from 'react-router-dom';
 import { getDoctor, createPatient, getDiseases, assignTreatment, dischargePatient, getTreatmentOptions, getDischargedPatients } from '../api.js';
+import './DoctorsDash.css'
 
 // Define the initial state for the reducer
 const initialState = {
@@ -198,13 +199,18 @@ const DoctorDashboard = () => {
         setSelectedDiseases(selected); // Update state
     };
 
+    // Toggle Modal Visibility
+    const toggleModal = () => {
+        setModalVisible(!modalVisible);
+    };
+
     // Render the UI
     if (!state.doctor) {
         return <div>Loading...</div>;
     }
 
     return (
-        <div>
+        <div className='dashboard-container'>
             <h2>Doctor Dashboard</h2>
             <strong>{state.doctor.name}</strong> - {state.doctor.specialty || 'General Doctor'}
 
