@@ -1,7 +1,9 @@
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { login } from '../api';
-import  {jwtDecode}  from 'jwt-decode';  
+import { jwtDecode } from 'jwt-decode';
+import './Login.css'
+import { Link } from 'react-router-dom';
 
 const Login = () => {
     const [username, setUsername] = useState('');
@@ -15,22 +17,22 @@ const Login = () => {
         try {
             const response = await login({ username, password });
             console.log(username);
-            
+
             // Log response to ensure the backend is returning correct data
-            console.log(response.data); 
-        
+            console.log(response.data);
+
             // Store tokens in local storage
             localStorage.setItem('access_token', response.data.access);
             localStorage.setItem('refresh_token', response.data.refresh);
-    
+
             // Decode the token to get the role
             const decodedToken = jwtDecode(response.data.access); // Decode JWT
             console.log("Decoded Token:", decodedToken);
-    
+
             // Check for role in the decoded token
             const role = decodedToken.role;  // Should be 'admin' or 'doctor'
             console.log("Role in token:", role);
-    
+
             // Navigate based on role
             if (role === 'admin') {
                 navigate('/admin/dashboard');  // Redirect to admin dashboard
@@ -48,28 +50,34 @@ const Login = () => {
     };
 
     return (
-        <form onSubmit={handleLogin}>
-            <h2>Login</h2>
-            <input
-                type="text"
-                placeholder="Username"
-                value={username}
-                onChange={(e) => setUsername(e.target.value)}
-                required
-                autoComplete="username"
-            />
-            <input
-                type="password"
-                placeholder="Password"
-                value={password}
-                onChange={(e) => setPassword(e.target.value)}
-                required
-                autoComplete="current-password"
-            />
-            <button type="submit" disabled={loading}>
-                {loading ? 'Logging in...' : 'Login'}
-            </button>
-        </form>
+        <div className="login-page-container">
+            {/* <img src=""  className="logo"></img> */}
+            <form className="login-form" onSubmit={handleLogin}>
+                <h2>Login</h2>
+                <input
+                    type="text"
+                    placeholder="Username"
+                    value={username}
+                    onChange={(e) => setUsername(e.target.value)}
+                    required
+                    autoComplete="username"
+                />
+                <input
+                    type="password"
+                    placeholder="Password"
+                    value={password}
+                    onChange={(e) => setPassword(e.target.value)}
+                    required
+                    autoComplete="current-password"
+                />
+                <button type="submit" disabled={loading}>
+                    {loading ? 'Logging in...' : 'Login'}
+                </button>
+                <Link to="/">
+                    <button type='go-home'>Home</button>
+                </Link>
+            </form>
+        </div>
     );
 };
 

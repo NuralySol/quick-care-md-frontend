@@ -1,0 +1,61 @@
+body {
+    margin: 0; /* Remove default margin */
+    padding: 0; /* Remove default padding */
+    height: 100vh; /* Full viewport height */
+    width: 100%; /* Full width */
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    font-family: Arial, sans-serif; /* Optional: Set a default font */
+    background: linear-gradient(180deg, #72c2f3, #013499); /* Gradient from light to dark blue */
+}
+
+
+.login-page-container {
+    height: 700px; /* Full viewport height */
+    width: 1200px; /* Full width */
+    background-image: url(../assets/wallpaper.png);
+    background-size: cover; /* Make sure the background covers the entire container */
+    background-position: center; /* Center the image */
+    background-repeat: no-repeat; /* Prevent the image from repeating */
+    display: flex; /* Flexbox to center the form */
+    justify-content: right; /* Horizontally center */
+    align-items: center; /* Vertically center */
+    border-radius: 10px;
+}
+
+.login-form {
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    width: 350px;
+    height: 400px;
+    border-radius: 8px;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1); /* Adds card-like shadow */
+    background: linear-gradient(#72c2f3, #013499);
+    padding: 20px; /* Adds spacing inside the card */
+    margin-right: 50px;
+}
+
+.login-form input, .login-form button {
+    width: 100%; /* Full width inputs/buttons */
+    margin-bottom: 15px; /* Spacing between elements */
+    padding: 10px; /* Padding for inputs/buttons */
+    border-radius: 5px; /* Rounds input/button corners */
+    border: 1px solid #ccc; /* Basic border for inputs */
+}
+
+.login-form button {
+    background-color: #ffffff; /* Button color */
+    color: #013499;
+    border: none;
+    border-radius: 40px;
+    cursor: pointer;
+    transition: background-color 0.3s ease; /* Smooth hover effect */
+    width: 100px;
+}
+
+.login-form button:hover {
+    background-color: #3f9ce3; /* Button hover color */
+}

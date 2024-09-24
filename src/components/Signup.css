@@ -1,0 +1,33 @@
+.admin-form {
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    width: 350px;
+    height: 400px;
+    border-radius: 8px;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1); /* Adds card-like shadow */
+    background: white;
+    padding: 20px; /* Adds spacing inside the card */
+    margin-right: 50px;
+}
+
+.admin-form input, .admin-form button {
+    width: 100%; /* Full width inputs/buttons */
+    margin-bottom: 15px; /* Spacing between elements */
+    padding: 10px; /* Padding for inputs/buttons */
+    border-radius: 5px; /* Rounds input/button corners */
+}
+
+.admin-form button {
+    background-color: #3f9ce3; /* Button color */
+    color: white;
+    border: none;
+    cursor: pointer;
+    transition: background-color 0.3s ease; /* Smooth hover effect */
+    width: 100%;
+}
+
+.admin-form button:hover {
+    background-color: #3380bb; /* Button hover color */
+}
