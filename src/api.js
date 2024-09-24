@@ -1,7 +1,7 @@
 import axios from 'axios';
 
 const api = axios.create({
-    baseURL: 'http://localhost:8000',  // Make sure this is your correct backend URL
+    baseURL: 'https://quick-care-md-46e277bedd2b.herokuapp.com/',  // Make sure this is your correct backend URL
 });
 
 const getAuthHeaders = () => {
