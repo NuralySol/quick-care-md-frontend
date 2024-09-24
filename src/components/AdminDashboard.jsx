@@ -90,6 +90,9 @@ const AdminDashboard = () => {
         setShowModal(false);
     };
 
+
+    // Handle crete doctor
+
     const handleCreateDoctor = async (e) => {
         e.preventDefault();
         setCreatingDoctor(true);
