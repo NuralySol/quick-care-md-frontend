@@ -1,8 +1,8 @@
 import { useEffect, useReducer, useState } from 'react';
-import { useParams } from 'react-router-dom';
-import { getDoctor, createPatient, getDiseases, assignTreatment, dischargePatient, getTreatmentOptions, getDischargedPatients } from '../api.js';
+import { useParams, Link } from 'react-router-dom'; 
+import { getDoctor, createPatient, getDiseases, assignTreatment, dischargePatient, getTreatmentOptions, getDischargedPatients } from '../api';
+import styles from './DoctorDashboard.module.css'; // Import the CSS module
 
-// Define the initial state for the reducer
 const initialState = {
     doctor: null,
     activePatients: [],
@@ -12,7 +12,6 @@ const initialState = {
     error: ''
 };
 
-// Define the reducer function
 const reducer = (state, action) => {
     switch (action.type) {
         case 'FETCH_DOCTOR':
@@ -66,18 +65,14 @@ const reducer = (state, action) => {
     }
 };
 
-// DoctorDashboard Component
 const DoctorDashboard = () => {
-    const { id } = useParams(); // Doctor ID from the route
+    const { id } = useParams(); 
     const [newPatientName, setNewPatientName] = useState('');
     const [selectedDiseases, setSelectedDiseases] = useState([]);
     const [selectedTreatmentOption, setSelectedTreatmentOption] = useState('');
     const [selectedPatientId, setSelectedPatientId] = useState(null);
-
-    // Use useReducer to handle the state
     const [state, dispatch] = useReducer(reducer, initialState);
 
-    // Fetch doctor and other related data on component mount
     useEffect(() => {
         const fetchInitialData = async () => {
             try {
@@ -86,22 +81,10 @@ const DoctorDashboard = () => {
                 const treatmentOptionsResponse = await getTreatmentOptions();
                 const dischargedPatientsResponse = await getDischargedPatients();
 
-                dispatch({
-                    type: 'FETCH_DOCTOR',
-                    payload: { doctor: doctorResponse.data },
-                });
-                dispatch({
-                    type: 'FETCH_DISEASES',
-                    payload: { diseases: diseaseResponse.data },
-                });
-                dispatch({
-                    type: 'FETCH_TREATMENT_OPTIONS',
-                    payload: { treatmentOptionsList: treatmentOptionsResponse.data },
-                });
-                dispatch({
-                    type: 'FETCH_DISCHARGED_PATIENTS',
-                    payload: { dischargedPatients: dischargedPatientsResponse.data },
-                });
+                dispatch({ type: 'FETCH_DOCTOR', payload: { doctor: doctorResponse.data } });
+                dispatch({ type: 'FETCH_DISEASES', payload: { diseases: diseaseResponse.data } });
+                dispatch({ type: 'FETCH_TREATMENT_OPTIONS', payload: { treatmentOptionsList: treatmentOptionsResponse.data } });
+                dispatch({ type: 'FETCH_DISCHARGED_PATIENTS', payload: { dischargedPatients: dischargedPatientsResponse.data } });
             } catch (error) {
                 dispatch({ type: 'SET_ERROR', payload: { error: 'Error fetching data' } });
                 console.error('Error fetching data:', error);
@@ -111,18 +94,12 @@ const DoctorDashboard = () => {
         fetchInitialData();
     }, [id]);
 
-    // Handle creating a new patient
     const handleCreatePatient = async (e) => {
         e.preventDefault();
         try {
             const diseaseObjects = state.diseases.filter(disease => selectedDiseases.includes(disease.disease_id));
 
-            const patientData = {
-                name: newPatientName,
-                doctor: state.doctor.id,
-                disease: diseaseObjects,
-            };
-
+            const patientData = { name: newPatientName, doctor: state.doctor.id, disease: diseaseObjects };
             const response = await createPatient(patientData);
 
             dispatch({ type: 'ADD_PATIENT', payload: { patient: response.data } });
@@ -134,10 +111,8 @@ const DoctorDashboard = () => {
         }
     };
 
-    // Handle discharging a patient and removing them from the active view
     const handleDischargePatient = async (patientId) => {
         const patient = state.activePatients.find(p => p.id === patientId);
-
         if (!patient?.disease.length || !(patient?.treatments?.length)) {
             alert("Patient must have at least one disease and one treatment before discharge.");
             return;
@@ -147,38 +122,19 @@ const DoctorDashboard = () => {
             const response = await dischargePatient(patientId);
             const dischargedPatient = response.data.discharge;
 
-            dispatch({
-                type: 'DISCHARGE_PATIENT',
-                payload: {
-                    patientId,
-                    dischargedPatient,
-                },
-            });
+            dispatch({ type: 'DISCHARGE_PATIENT', payload: { patientId, dischargedPatient } });
         } catch (error) {
             dispatch({ type: 'SET_ERROR', payload: { error: 'Failed to discharge patient' } });
             console.error('Failed to discharge patient:', error);
         }
     };
 
-    // Handle assigning a treatment to a patient
     const handleAssignTreatment = async (e) => {
         e.preventDefault();
         try {
-            const treatmentData = {
-                treatment_options: selectedTreatmentOption,
-                doctor: state.doctor.id,
-                patient: selectedPatientId,
-            };
-
+            const treatmentData = { treatment_options: selectedTreatmentOption, doctor: state.doctor.id, patient: selectedPatientId };
             const response = await assignTreatment(treatmentData);
-            dispatch({
-                type: 'ASSIGN_TREATMENT',
-                payload: {
-                    patientId: selectedPatientId,
-                    treatment: response.data,
-                },
-            });
-
+            dispatch({ type: 'ASSIGN_TREATMENT', payload: { patientId: selectedPatientId, treatment: response.data } });
             setSelectedTreatmentOption('');
         } catch (error) {
             dispatch({ type: 'SET_ERROR', payload: { error: 'Failed to assign treatment' } });
@@ -186,147 +142,150 @@ const DoctorDashboard = () => {
         }
     };
 
-    // Handle disease selection
     const handleDiseaseSelection = (e) => {
         const options = e.target.options;
         const selected = [];
         for (let i = 0; i < options.length; i++) {
             if (options[i].selected) {
-                selected.push(Number(options[i].value)); // Collect selected disease IDs
+                selected.push(Number(options[i].value));
             }
         }
-        setSelectedDiseases(selected); // Update state
+        setSelectedDiseases(selected);
     };
 
-    // Render the UI
     if (!state.doctor) {
         return <div>Loading...</div>;
     }
 
     return (
-        <div>
-            <h2>Doctor Dashboard</h2>
-            <strong>{state.doctor.name}</strong> - {state.doctor.specialty || 'General Doctor'}
+        <div className={styles.dashboardContainer}>
+            <div className={styles.dashboardWrapper}>
+                <h2 className={styles.dashboardHeader}>Doctor Dashboard</h2>
+                <strong>{state.doctor.name}</strong> - {state.doctor.specialty || 'General Doctor'}
 
-            <div style={{ display: 'flex', justifyContent: 'space-between' }}>
-                {/* Active Patients List */}
-                <div>
-                    <h4>Active Patients:</h4>
-                    <ul>
-                        {state.activePatients.map((patient) => (
-                            <li key={patient.id}>
-                                <strong>{patient.name}</strong> (Admitted: {new Date(patient.time_admitted).toLocaleDateString()})
-                                <ul>
-                                    <li><strong>Diseases:</strong>
-                                        <ul>
-                                            {patient.disease?.map((disease) => (
-                                                <li key={disease.disease_id}>
-                                                    {disease.name} - Terminal: {disease.is_terminal ? 'Yes' : 'No'}
-                                                </li>
-                                            ))}
-                                        </ul>
-                                    </li>
-                                    <li><strong>Treatments:</strong>
-                                        <ul>
-                                            {patient.treatments?.map((treatment) => (
-                                                <li key={treatment.treatment_id}>
-                                                    {treatment.treatment_options} - Success: {treatment.success ? 'Yes' : 'No'}
-                                                </li>
-                                            ))}
-                                        </ul>
-                                    </li>
-                                    <li>
-                                        <button onClick={() => setSelectedPatientId(patient.id)}>
-                                            Assign Treatment
-                                        </button>
-                                        <button
-                                            onClick={() => handleDischargePatient(patient.id)}
-                                            disabled={!(patient.disease?.length && patient.treatments?.length)}  // Disable button if no disease or treatment
-                                        >
-                                            Discharge Patient
-                                        </button>
-                                    </li>
-                                </ul>
-                            </li>
-                        ))}
-                    </ul>
+                <div className={styles.patientList}>
+                    <div className={styles.patientSection}>
+                        <h4>Active Patients:</h4>
+                        <ul>
+                            {state.activePatients.map((patient) => (
+                                <li key={patient.id}>
+                                    <strong>{patient.name}</strong> (Admitted: {new Date(patient.time_admitted).toLocaleDateString()})
+                                    <ul>
+                                        <li><strong>Diseases:</strong>
+                                            <ul>
+                                                {patient.disease?.map((disease) => (
+                                                    <li key={disease.disease_id}>
+                                                        {disease.name} - Terminal: {disease.is_terminal ? 'Yes' : 'No'}
+                                                    </li>
+                                                ))}
+                                            </ul>
+                                        </li>
+                                        <li><strong>Treatments:</strong>
+                                            <ul>
+                                                {patient.treatments?.map((treatment) => (
+                                                    <li key={treatment.treatment_id}>
+                                                        {treatment.treatment_options} - Success: {treatment.success ? 'Yes' : 'No'}
+                                                    </li>
+                                                ))}
+                                            </ul>
+                                        </li>
+                                        <li>
+                                            <button onClick={() => setSelectedPatientId(patient.id)}>
+                                                Assign Treatment
+                                            </button>
+                                            <button onClick={() => handleDischargePatient(patient.id)} disabled={!(patient.disease?.length && patient.treatments?.length)}>
+                                                Discharge Patient
+                                            </button>
+                                        </li>
+                                    </ul>
+                                </li>
+                            ))}
+                        </ul>
+                    </div>
+
+                    <div className={styles.patientSection}>
+                        <h4>Discharged Patients:</h4>
+                        <ul>
+                            {state.dischargedPatients.map((patient) => (
+                                <li key={patient.discharge_id}>
+                                    <strong>{patient.patient_name}</strong> - Status: <em>Discharged</em>
+                                    <ul>
+                                        <li><strong>Diseases:</strong>
+                                            <ul>
+                                                {patient.disease?.map((disease) => (
+                                                    <li key={disease.disease_id}>
+                                                        {disease.name} - Terminal: {disease.is_terminal ? 'Yes' : 'No'}
+                                                    </li>
+                                                ))}
+                                            </ul>
+                                        </li>
+                                        <li><strong>Treatments Received:</strong>
+                                            <ul>
+                                                {patient.treatments?.map((treatment) => (
+                                                    <li key={treatment.treatment_id}>
+                                                        {treatment.treatment_options} - Success: {treatment.success ? 'Yes' : 'No'}
+                                                    </li>
+                                                ))}
+                                            </ul>
+                                        </li>
+                                    </ul>
+                                </li>
+                            ))}
+                        </ul>
+                    </div>
                 </div>
 
-                {/* Discharged Patients List */}
-                <div>
-                    <h4>Discharged Patients:</h4>
-                    <ul>
-                        {state.dischargedPatients.map((patient) => (
-                            <li key={patient.discharge_id}>
-                                <strong>{patient.patient_name}</strong> - Status: <em>Discharged</em>
-                                <ul>
-                                    <li><strong>Diseases:</strong>
-                                        <ul>
-                                            {patient.disease?.map((disease) => (
-                                                <li key={disease.disease_id}>
-                                                    {disease.name} - Terminal: {disease.is_terminal ? 'Yes' : 'No'}
-                                                </li>
-                                            ))}
-                                        </ul>
-                                    </li>
-                                    <li><strong>Treatments Received:</strong>
-                                        <ul>
-                                            {patient.treatments?.map((treatment) => (
-                                                <li key={treatment.treatment_id}>
-                                                    {treatment.treatment_options} - Success: {treatment.success ? 'Yes' : 'No'}
-                                                </li>
-                                            ))}
-                                        </ul>
-                                    </li>
-                                </ul>
-                            </li>
-                        ))}
-                    </ul>
-                </div>
-            </div>
-
-            <h3>Create a New Patient</h3>
-            <form onSubmit={handleCreatePatient}>
-                <label>Patient Name:</label>
-                <input
-                    type="text"
-                    value={newPatientName}
-                    onChange={(e) => setNewPatientName(e.target.value)}
-                    required
-                />
-                <select multiple={true} value={selectedDiseases} onChange={handleDiseaseSelection}>
-                    {state.diseases.map(disease => (
-                        <option key={disease.disease_id} value={disease.disease_id}>
-                            {disease.name}
-                        </option>
-                    ))}
-                </select>
-                <button type="submit">Create Patient</button>
-            </form>
-
-            {selectedPatientId && (
-                <div>
-                    <h3>Assign Treatment</h3>
-                    <form onSubmit={handleAssignTreatment}>
-                        <label>Treatment Options:</label>
-                        <select
-                            value={selectedTreatmentOption}
-                            onChange={(e) => setSelectedTreatmentOption(e.target.value)}
+                <div className={styles.formWrapper}>
+                    <h3>Create a New Patient</h3>
+                    <form onSubmit={handleCreatePatient}>
+                        <label>Patient Name:</label>
+                        <input
+                            type="text"
+                            value={newPatientName}
+                            onChange={(e) => setNewPatientName(e.target.value)}
                             required
-                        >
-                            <option value="">Select Treatment</option>
-                            {state.treatmentOptionsList.map((option, index) => (
-                                <option key={index} value={option}>
-                                    {option}
+                        />
+                        <select multiple={true} value={selectedDiseases} onChange={handleDiseaseSelection}>
+                            {state.diseases.map(disease => (
+                                <option key={disease.disease_id} value={disease.disease_id}>
+                                    {disease.name}
                                 </option>
                             ))}
                         </select>
-                        <button type="submit">Assign Treatment</button>
+                        <button type="submit" className={styles.submitButton}>Create Patient</button>
                     </form>
                 </div>
-            )}
 
-            {state.error && <p style={{ color: 'red' }}>{state.error}</p>}
+                {selectedPatientId && (
+                    <div className={styles.formWrapper}>
+                        <h3>Assign Treatment</h3>
+                        <form onSubmit={handleAssignTreatment}>
+                            <label>Treatment Options:</label>
+                            <select
+                                value={selectedTreatmentOption}
+                                onChange={(e) => setSelectedTreatmentOption(e.target.value)}
+                                required
+                            >
+                                <option value="">Select Treatment</option>
+                                {state.treatmentOptionsList.map((option, index) => (
+                                    <option key={index} value={option}>
+                                        {option}
+                                    </option>
+                                ))}
+                            </select>
+                            <button type="submit" className={styles.submitButton}>Assign Treatment</button>
+                        </form>
+                    </div>
+                )}
+
+                <div style={{ marginTop: '20px' }}>
+                    <Link to="/login">
+                        <button className={styles.submitButton}>Go to Login</button>
+                    </Link>
+                </div>
+
+                {state.error && <p className={styles.errorMessage}>{state.error}</p>}
+            </div>
         </div>
     );
 };

@@ -1,7 +1,8 @@
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { login } from '../api';
-import  {jwtDecode}  from 'jwt-decode';  
+import {jwtDecode} from 'jwt-decode';  
+import styles from './Login.module.css';  
 
 const Login = () => {
     const [username, setUsername] = useState('');
@@ -14,30 +15,20 @@ const Login = () => {
         setLoading(true);
         try {
             const response = await login({ username, password });
-            console.log(username);
             
-            // Log response to ensure the backend is returning correct data
-            console.log(response.data); 
-        
-            // Store tokens in local storage
             localStorage.setItem('access_token', response.data.access);
             localStorage.setItem('refresh_token', response.data.refresh);
     
-            // Decode the token to get the role
-            const decodedToken = jwtDecode(response.data.access); // Decode JWT
-            console.log("Decoded Token:", decodedToken);
+            const decodedToken = jwtDecode(response.data.access);
     
-            // Check for role in the decoded token
-            const role = decodedToken.role;  // Should be 'admin' or 'doctor'
-            console.log("Role in token:", role);
+            const role = decodedToken.role;
     
-            // Navigate based on role
             if (role === 'admin') {
-                navigate('/admin/dashboard');  // Redirect to admin dashboard
+                navigate('/admin/dashboard');
             } else if (role === 'doctor') {
-                navigate(`/doctor/dashboard/${decodedToken.user_id}`);  // Redirect to doctor dashboard with user_id
+                navigate(`/doctor/dashboard/${decodedToken.user_id}`);
             } else {
-                alert('Unknown role');  // Handle unknown role case
+                alert('Unknown role');
             }
         } catch (error) {
             const errorMessage = error.response?.data?.detail || 'Login failed. Please try again.';
@@ -48,28 +39,36 @@ const Login = () => {
     };
 
     return (
-        <form onSubmit={handleLogin}>
-            <h2>Login</h2>
-            <input
-                type="text"
-                placeholder="Username"
-                value={username}
-                onChange={(e) => setUsername(e.target.value)}
-                required
-                autoComplete="username"
-            />
-            <input
-                type="password"
-                placeholder="Password"
-                value={password}
-                onChange={(e) => setPassword(e.target.value)}
-                required
-                autoComplete="current-password"
-            />
-            <button type="submit" disabled={loading}>
-                {loading ? 'Logging in...' : 'Login'}
-            </button>
-        </form>
+        <div className={styles.loginContainer}>
+            <form className={styles.loginForm} onSubmit={handleLogin}>
+                <h2>Login</h2>
+                <div className={styles.inputGroup}>
+                    <label>Username</label>
+                    <input
+                        type="text"
+                        placeholder="Username"
+                        value={username}
+                        onChange={(e) => setUsername(e.target.value)}
+                        required
+                        autoComplete="username"
+                    />
+                </div>
+                <div className={styles.inputGroup}>
+                    <label>Password</label>
+                    <input
+                        type="password"
+                        placeholder="Password"
+                        value={password}
+                        onChange={(e) => setPassword(e.target.value)}
+                        required
+                        autoComplete="current-password"
+                    />
+                </div>
+                <button className={styles.loginButton} type="submit" disabled={loading}>
+                    {loading ? 'Logging in...' : 'Login'}
+                </button>
+            </form>
+        </div>
     );
 };
 
