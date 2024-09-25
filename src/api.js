@@ -1,8 +1,7 @@
 import axios from 'axios';
-const baseURL = import.meta.env.VITE_BASE_URL
 
 const api = axios.create({
-    baseURL: baseURL,  // Make sure this is your correct backend URL
+    baseURL: 'https://quick-care-md-46e277bedd2b.herokuapp.com/',
 });
 
 const getAuthHeaders = () => {
