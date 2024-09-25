@@ -3,12 +3,10 @@
 QuickCareMD is a Django / React SPA walk-in medical app designed to enhance patient-doctor interactions and improve hospital workflow. With QuickCareMD, doctors can efficiently manage patient visits by viewing assigned patients, prescribing medication, and automatically removing treated patients from their dashboard (Discharging them) and sending the report to the Administration. The app also empowers hospital / administrators to manage the doctor roster, adding or removing doctors as needed to keep operations running smoothly. QuickCare ensures patients receive timely care while maintaining a seamless and organized experience for both medical professionals and hospital staff.
 
 
-# Wireframes
+# Screenshot
 
 ![landingPage](src/assets/LandingDash.png)
-![LoginPage](src/assets/LoginDash.png)
-![AdminDash](src/assets/AdminDash.png)
-![DoctorsDash](src/assets/DoctorsDash.png)
+
 
 # Attributions
 
