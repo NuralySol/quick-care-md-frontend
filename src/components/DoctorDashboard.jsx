@@ -1,5 +1,5 @@
 import { useEffect, useReducer, useState } from 'react';
-import { useParams } from 'react-router-dom';
+import { useParams, Link } from 'react-router-dom';
 import { getDoctor, createPatient, getDiseases, assignTreatment, dischargePatient, getTreatmentOptions, getDischargedPatients } from '../api.js';
 import './DoctorsDash.css'
 
@@ -199,11 +199,6 @@ const DoctorDashboard = () => {
         setSelectedDiseases(selected); // Update state
     };
 
-    // Toggle Modal Visibility
-    const toggleModal = () => {
-        setModalVisible(!modalVisible);
-    };
-
     // Render the UI
     if (!state.doctor) {
         return <div>Loading...</div>;
@@ -211,6 +206,16 @@ const DoctorDashboard = () => {
 
     return (
         <div className='dashboard-container'>
+            {/* Hospital name */}
+            <h1 style={{ textAlign: 'center', marginBottom: '20px' }}>QuickCare Md</h1>
+
+            {/* Add home button */}
+            <div style={{ textAlign: 'right' }}>
+                <Link to="/" style={{ padding: '10px 20px', backgroundColor: '#3498db', color: 'white', textDecoration: 'none', borderRadius: '4px' }}>
+                    Home
+                </Link>
+            </div>
+
             <h2>Doctor Dashboard</h2>
             <strong>{state.doctor.name}</strong> - {state.doctor.specialty || 'General Doctor'}
 

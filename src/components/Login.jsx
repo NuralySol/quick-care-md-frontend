@@ -51,7 +51,9 @@ const Login = () => {
 
     return (
         <div className="login-page-container">
-            {/* <img src=""  className="logo"></img> */}
+            {/* Hospital name at the top */}
+            <h1 className="hospital-name">QuickCare Md</h1>
+            
             <form className="login-form" onSubmit={handleLogin}>
                 <h2>Login</h2>
                 <input

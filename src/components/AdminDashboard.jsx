@@ -90,7 +90,6 @@ const AdminDashboard = () => {
         setShowModal(false);
     };
 
-
     // Handle crete doctor
 
     const handleCreateDoctor = async (e) => {
@@ -141,6 +140,9 @@ const AdminDashboard = () => {
 
             <div className='admin-container'>
                 <div style={{ padding: '20px' }}>
+                    {/* Hospital name */}
+                    <h1 style={{ textAlign: 'center', marginBottom: '20px' }}>QuickCare Md</h1>
+
                     <h2>Admin Dashboard</h2>
 
                     {error && <p style={{ color: 'red' }}>{error}</p>}

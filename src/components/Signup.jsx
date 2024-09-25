@@ -28,6 +28,11 @@ const Signup = () => {
 
     return (
         <div className='admin-form'>
+            {/* Hospital name at the top */}
+            <Typography variant="h4" gutterBottom textAlign="center" sx={{ mb: 3 }}>
+                QuickCare Md
+            </Typography>
+
             <Box component="form" onSubmit={handleSignup} sx={{ maxWidth: 400, margin: 'auto', padding: 3 }}>
                 <Typography variant="h5" gutterBottom>
                     Create Admin Account
