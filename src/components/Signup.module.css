@@ -3,7 +3,7 @@
     justify-content: center;
     align-items: center;
     min-height: 100vh;
-    background-image: url('../assets/BackgroundImage1.jpg'); 
+    background-image: url('../assets/BackgroundImage.jpg'); 
     background-size: cover; 
     background-position: center;
     background-repeat: no-repeat;
@@ -63,4 +63,64 @@ h2 {
 .signupLinkContainer {
     text-align: center;
     margin-top: 20px;
+    font-size: 16px;
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    color: #555;
+}
+
+.signupLinkContainer a {
+    color: #3498db;
+    text-decoration: none;
+    font-weight: bold;
+    padding: 8px 16px;
+    border-radius: 8px;
+    background-color: #eaf6ff;
+    transition: background-color 0.3s, color 0.3s;
+}
+
+.signupLinkContainer a:hover {
+    background-color: #3498db;
+    color: white;
+    text-decoration: none;
+    transform: translateY(-3px);
+    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+}
+
+/* Media queries for mobile responsiveness */
+@media (max-width: 768px) {
+    .signupForm {
+        padding: 30px 20px;
+    }
+
+    h2 {
+        font-size: 24px;
+    }
+
+    .signupButton {
+        font-size: 16px;
+        padding: 12px;
+    }
+
+    .signupLinkContainer {
+        font-size: 14px;
+    }
+}
+
+@media (max-width: 480px) {
+    .signupForm {
+        padding: 20px 15px;
+    }
+
+    h2 {
+        font-size: 20px;
+    }
+
+    .signupButton {
+        font-size: 14px;
+        padding: 10px;
+    }
+
+    .signupLinkContainer {
+        font-size: 14px;
+    }
 }

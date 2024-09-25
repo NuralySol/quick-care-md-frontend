@@ -69,7 +69,7 @@ const Signup = () => {
                 {/* Add link to login page */}
                 <Box className={styles.signupLinkContainer}>
                     <Typography variant="body2">
-                        Already have an account?{' '}
+                        Already have an account Doctor or Admin?{' '}
                         <Link component={RouterLink} to="/login">
                             Login here
                         </Link>

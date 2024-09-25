@@ -3,7 +3,10 @@
     justify-content: center;
     align-items: center;
     min-height: 100vh;
-    background: linear-gradient(135deg, #e0f7fa 0%, #f0f4f8 100%);
+    background-image: url('../assets/Wallpaper.jpg'); 
+    background-size: cover;
+    background-position: center;
+    background-repeat: no-repeat;
     margin: 0;
     padding: 20px;
     box-sizing: border-box;
@@ -55,6 +58,17 @@ h2 {
     box-shadow: 0 0 5px rgba(0, 123, 255, 0.5);
 }
 
+.inputGroup input.error {
+    border-color: #e74c3c;
+    background-color: #fee;
+}
+
+.errorMessage {
+    color: #e74c3c;
+    font-size: 12px;
+    margin-top: 5px;
+}
+
 .loginButton {
     width: 100%;
     padding: 14px;
@@ -83,6 +97,81 @@ h2 {
     transform: none;
 }
 
+.loginButton.loading {
+    background-color: #0056b3;
+    cursor: wait;
+}
+
+.loginButton.loading::after {
+    content: '';
+    border: 3px solid #f3f3f3;
+    border-top: 3px solid #3498db;
+    border-radius: 50%;
+    width: 16px;
+    height: 16px;
+    animation: spin 1s linear infinite;
+    display: inline-block;
+    margin-left: 10px;
+}
+
+@keyframes spin {
+    0% { transform: rotate(0deg); }
+    100% { transform: rotate(360deg); }
+}
+
+@media (max-width: 768px) {
+    .loginForm {
+        padding: 30px 20px;
+    }
+
+    h2 {
+        font-size: 24px;
+    }
+
+    .loginButton {
+        font-size: 16px;
+        padding: 12px;
+    }
+}
+
+@media (max-width: 480px) {
+    .loginForm {
+        padding: 20px 15px;
+    }
+
+    h2 {
+        font-size: 20px;
+    }
+
+    .loginButton {
+        font-size: 14px;
+        padding: 10px;
+    }
+
+    .inputGroup input {
+        padding: 12px;
+        font-size: 14px;
+    }
+}
+
 input, label {
     display: block;
+}
+
+.homeButton {
+    display: inline-block;
+    width: 80%;
+    text-align: center;
+    padding: 10px;
+    margin-top: 10px;
+    background-color: #064d8b; 
+    color: white;
+    border-radius: 5px;
+    text-decoration: none;
+    font-size: 16px;
+    transition: background-color 0.3s ease;
+}
+
+.homeButton:hover {
+    background-color: #df8507; 
 }

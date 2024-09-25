@@ -1,7 +1,7 @@
 import axios from 'axios';
 
 const api = axios.create({
-    baseURL: 'https://quick-care-md-46e277bedd2b.herokuapp.com/',  // Make sure this is your correct backend URL
+    baseURL: 'https://quick-care-md-46e277bedd2b.herokuapp.com/',  
 });
 
 const getAuthHeaders = () => {
@@ -9,7 +9,6 @@ const getAuthHeaders = () => {
     return token ? { Authorization: `Bearer ${token}` } : {};
 };
 
-// Interceptor for handling token expiration and refreshing
 api.interceptors.response.use(
     (response) => response,
     async (error) => {
@@ -21,19 +20,17 @@ api.interceptors.response.use(
 
             if (tokenRefreshed) {
                 originalRequest.headers['Authorization'] = `Bearer ${localStorage.getItem('access_token')}`;
-                return api(originalRequest);  // Retry the original request
+                return api(originalRequest);  
             } else {
-                // Handle logout if refresh fails
                 localStorage.removeItem('access_token');
                 localStorage.removeItem('refresh_token');
-                window.location.href = '/login';  // Redirect to login page
+                window.location.href = '/login';  
             }
         }
         return Promise.reject(error);
     }
 );
 
-// Login request - retrieves access and refresh tokens
 export const login = async (credentials) => {
     return await api.post('/token/', credentials);
 };
@@ -82,7 +79,7 @@ export const deletePatient = (id) => api.delete(`/patients/${id}/`, { headers: g
 // Discharge-related APIs
 export const getDischargedPatients = async () => api.get('/discharges/', { headers: getAuthHeaders() });
 export const dischargePatient = async (patientId) => api.post(`/patients/${patientId}/discharge/`, {}, { headers: getAuthHeaders() });
-// Add this to your api.js or equivalent file
+
 export const purgeAllDischargedPatients = async () => {
     return api.delete(`/patients/discharged/purge/`, { headers: getAuthHeaders() });
 };
@@ -94,3 +91,4 @@ export const getDiseases = () => api.get('/diseases/', { headers: getAuthHeaders
 // Treatment-related APIs
 export const assignTreatment = async (treatmentData) => api.post('/treatments/', treatmentData, { headers: getAuthHeaders() });
 export const getTreatmentOptions = () => api.get('/treatments/options/', { headers: getAuthHeaders() });
+

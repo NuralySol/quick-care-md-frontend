@@ -1,12 +1,11 @@
 import { useEffect, useReducer, useState } from 'react';
-import { useParams, Link } from 'react-router-dom'; 
-import { getDoctor, createPatient, getDiseases, assignTreatment, dischargePatient, getTreatmentOptions, getDischargedPatients } from '../api';
-import styles from './DoctorDashboard.module.css'; // Import the CSS module
+import { useParams, Link, useNavigate } from 'react-router-dom'; 
+import { getDoctor, createPatient, getDiseases, assignTreatment, dischargePatient, getTreatmentOptions } from '../api';
+import styles from './DoctorDashboard.module.css';
 
 const initialState = {
     doctor: null,
-    activePatients: [],
-    dischargedPatients: [],
+    patients: [], 
     diseases: [],
     treatmentOptionsList: [],
     error: ''
@@ -18,12 +17,7 @@ const reducer = (state, action) => {
             return {
                 ...state,
                 doctor: action.payload.doctor,
-                activePatients: action.payload.doctor.patients.filter(patient => !patient.discharged),
-            };
-        case 'FETCH_DISCHARGED_PATIENTS':
-            return {
-                ...state,
-                dischargedPatients: action.payload.dischargedPatients,
+                patients: action.payload.doctor.patients, 
             };
         case 'FETCH_DISEASES':
             return {
@@ -38,18 +32,19 @@ const reducer = (state, action) => {
         case 'ADD_PATIENT':
             return {
                 ...state,
-                activePatients: [...state.activePatients, action.payload.patient],
+                patients: [...state.patients, action.payload.patient],
             };
         case 'DISCHARGE_PATIENT':
             return {
                 ...state,
-                activePatients: state.activePatients.filter(patient => patient.id !== action.payload.patientId),
-                dischargedPatients: [...state.dischargedPatients, action.payload.dischargedPatient],
+                patients: state.patients.map(patient =>
+                    patient.id === action.payload.patientId ? { ...patient, discharged: true } : patient
+                ),
             };
         case 'ASSIGN_TREATMENT':
             return {
                 ...state,
-                activePatients: state.activePatients.map(patient =>
+                patients: state.patients.map(patient =>
                     patient.id === action.payload.patientId
                         ? { ...patient, treatments: [...(patient.treatments ?? []), action.payload.treatment] }
                         : patient
@@ -66,7 +61,8 @@ const reducer = (state, action) => {
 };
 
 const DoctorDashboard = () => {
-    const { id } = useParams(); 
+    const { id } = useParams();
+    const navigate = useNavigate(); 
     const [newPatientName, setNewPatientName] = useState('');
     const [selectedDiseases, setSelectedDiseases] = useState([]);
     const [selectedTreatmentOption, setSelectedTreatmentOption] = useState('');
@@ -79,12 +75,10 @@ const DoctorDashboard = () => {
                 const doctorResponse = await getDoctor(id);
                 const diseaseResponse = await getDiseases();
                 const treatmentOptionsResponse = await getTreatmentOptions();
-                const dischargedPatientsResponse = await getDischargedPatients();
 
                 dispatch({ type: 'FETCH_DOCTOR', payload: { doctor: doctorResponse.data } });
                 dispatch({ type: 'FETCH_DISEASES', payload: { diseases: diseaseResponse.data } });
                 dispatch({ type: 'FETCH_TREATMENT_OPTIONS', payload: { treatmentOptionsList: treatmentOptionsResponse.data } });
-                dispatch({ type: 'FETCH_DISCHARGED_PATIENTS', payload: { dischargedPatients: dischargedPatientsResponse.data } });
             } catch (error) {
                 dispatch({ type: 'SET_ERROR', payload: { error: 'Error fetching data' } });
                 console.error('Error fetching data:', error);
@@ -112,17 +106,15 @@ const DoctorDashboard = () => {
     };
 
     const handleDischargePatient = async (patientId) => {
-        const patient = state.activePatients.find(p => p.id === patientId);
+        const patient = state.patients.find(p => p.id === patientId);
         if (!patient?.disease.length || !(patient?.treatments?.length)) {
             alert("Patient must have at least one disease and one treatment before discharge.");
             return;
         }
 
         try {
-            const response = await dischargePatient(patientId);
-            const dischargedPatient = response.data.discharge;
-
-            dispatch({ type: 'DISCHARGE_PATIENT', payload: { patientId, dischargedPatient } });
+            await dischargePatient(patientId);
+            dispatch({ type: 'DISCHARGE_PATIENT', payload: { patientId } });
         } catch (error) {
             dispatch({ type: 'SET_ERROR', payload: { error: 'Failed to discharge patient' } });
             console.error('Failed to discharge patient:', error);
@@ -153,23 +145,47 @@ const DoctorDashboard = () => {
         setSelectedDiseases(selected);
     };
 
+    const handleLogout = () => {
+        localStorage.clear();
+        navigate('/login'); 
+    };
+
     if (!state.doctor) {
         return <div>Loading...</div>;
     }
 
     return (
         <div className={styles.dashboardContainer}>
+            {/* Log Out Button */}
+            <div style={{ display: 'flex', justifyContent: 'flex-end', width: '100%', marginBottom: '20px' }}>
+                <button
+                    onClick={handleLogout}
+                    style={{
+                        backgroundColor: '#e67e22', 
+                        color: 'white',
+                        padding: '10px 20px',
+                        borderRadius: '5px',
+                        border: 'none',
+                        cursor: 'pointer',
+                        fontWeight: 'bold',
+                        transition: 'background-color 0.3s ease',
+                    }}
+                >
+                    Log Out
+                </button>
+            </div>
+
             <div className={styles.dashboardWrapper}>
                 <h2 className={styles.dashboardHeader}>Doctor Dashboard</h2>
                 <strong>{state.doctor.name}</strong> - {state.doctor.specialty || 'General Doctor'}
 
                 <div className={styles.patientList}>
                     <div className={styles.patientSection}>
-                        <h4>Active Patients:</h4>
+                        <h4>Patients:</h4>
                         <ul>
-                            {state.activePatients.map((patient) => (
-                                <li key={patient.id}>
-                                    <strong>{patient.name}</strong> (Admitted: {new Date(patient.time_admitted).toLocaleDateString()})
+                            {state.patients.map((patient) => (
+                                <li key={patient.id} className={patient.discharged ? styles.dischargedPatient : ''}>
+                                    <strong>{patient.name}</strong> {patient.discharged && <span>(Discharged)</span>}
                                     <ul>
                                         <li><strong>Diseases:</strong>
                                             <ul>
@@ -184,50 +200,21 @@ const DoctorDashboard = () => {
                                             <ul>
                                                 {patient.treatments?.map((treatment) => (
                                                     <li key={treatment.treatment_id}>
-                                                        {treatment.treatment_options} - Success: {treatment.success ? 'Yes' : 'No'}
+                                                        {treatment.treatment_options} - Administered: {treatment.success ? 'Yes' : 'No'}
                                                     </li>
                                                 ))}
                                             </ul>
                                         </li>
-                                        <li>
-                                            <button onClick={() => setSelectedPatientId(patient.id)}>
-                                                Assign Treatment
-                                            </button>
-                                            <button onClick={() => handleDischargePatient(patient.id)} disabled={!(patient.disease?.length && patient.treatments?.length)}>
-                                                Discharge Patient
-                                            </button>
-                                        </li>
-                                    </ul>
-                                </li>
-                            ))}
-                        </ul>
-                    </div>
-
-                    <div className={styles.patientSection}>
-                        <h4>Discharged Patients:</h4>
-                        <ul>
-                            {state.dischargedPatients.map((patient) => (
-                                <li key={patient.discharge_id}>
-                                    <strong>{patient.patient_name}</strong> - Status: <em>Discharged</em>
-                                    <ul>
-                                        <li><strong>Diseases:</strong>
-                                            <ul>
-                                                {patient.disease?.map((disease) => (
-                                                    <li key={disease.disease_id}>
-                                                        {disease.name} - Terminal: {disease.is_terminal ? 'Yes' : 'No'}
-                                                    </li>
-                                                ))}
-                                            </ul>
-                                        </li>
-                                        <li><strong>Treatments Received:</strong>
-                                            <ul>
-                                                {patient.treatments?.map((treatment) => (
-                                                    <li key={treatment.treatment_id}>
-                                                        {treatment.treatment_options} - Success: {treatment.success ? 'Yes' : 'No'}
-                                                    </li>
-                                                ))}
-                                            </ul>
-                                        </li>
+                                        {!patient.discharged && (
+                                            <li>
+                                                <button onClick={() => setSelectedPatientId(patient.id)}>
+                                                    Assign Treatment
+                                                </button>
+                                                <button onClick={() => handleDischargePatient(patient.id)} disabled={!(patient.disease?.length && patient.treatments?.length)}>
+                                                    Discharge Patient
+                                                </button>
+                                            </li>
+                                        )}
                                     </ul>
                                 </li>
                             ))}

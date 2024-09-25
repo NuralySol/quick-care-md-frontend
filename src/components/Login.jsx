@@ -1,8 +1,8 @@
 import { useState } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, Link } from 'react-router-dom'; 
 import { login } from '../api';
-import {jwtDecode} from 'jwt-decode';  
-import styles from './Login.module.css';  
+import { jwtDecode } from 'jwt-decode';
+import styles from './Login.module.css';
 
 const Login = () => {
     const [username, setUsername] = useState('');
@@ -67,6 +67,11 @@ const Login = () => {
                 <button className={styles.loginButton} type="submit" disabled={loading}>
                     {loading ? 'Logging in...' : 'Login'}
                 </button>
+
+                {/* Go to Home button */}
+                <Link to="/" className={styles.homeButton}>
+                    Go to Home
+                </Link>
             </form>
         </div>
     );

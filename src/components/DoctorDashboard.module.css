@@ -1,47 +1,57 @@
-
 .dashboardContainer {
     display: flex;
     flex-direction: column;
     justify-content: center;
     align-items: center;
     min-height: 100vh;
-    background: linear-gradient(135deg, #e3f2fd 0%, #e1f5fe 100%);
-    padding: 20px;
+    background-image: url('../assets/Wallpaper2.jpg');
+    background-size: cover;
+    background-position: center;
+    background-attachment: fixed;
+    background-repeat: no-repeat;
+    background-color: rgba(227, 242, 253, 0.8);
+    padding: 10px;
+    box-sizing: border-box;
 }
 
 .dashboardWrapper {
     width: 100%;
     max-width: 1000px;
-    background-color: #fff;
+    background-color: #ffffff;
     border-radius: 12px;
     box-shadow: 0 8px 20px rgba(0, 0, 0, 0.1);
-    padding: 30px;
+    padding: 40px;
     font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    backdrop-filter: blur(5px);
 }
 
 .dashboardHeader {
     text-align: center;
     color: #007BFF;
-    font-size: 26px;
+    font-size: 32px;
     font-weight: bold;
-    margin-bottom: 40px;
+    margin-bottom: 30px;
 }
 
 .patientList {
     display: flex;
     justify-content: space-between;
-    margin-bottom: 40px;
+    flex-wrap: wrap;
+    margin-bottom: 30px;
 }
 
 .patientSection {
     flex: 1;
-    margin: 0 10px;
+    margin: 0 15px;
+    min-width: 300px;
 }
 
 .patientSection h4 {
     color: #007BFF;
-    font-size: 20px;
+    font-size: 24px;
     margin-bottom: 20px;
+    border-bottom: 2px solid #007BFF;
+    padding-bottom: 10px;
 }
 
 .patientSection ul {
@@ -52,23 +62,30 @@
 .patientSection li {
     background-color: #f7f9fc;
     border: 1px solid #ddd;
-    padding: 15px;
+    padding: 20px;
     border-radius: 8px;
-    margin-bottom: 10px;
+    margin-bottom: 15px;
+    transition: background-color 0.3s;
+}
+
+.patientSection li:hover {
+    background-color: #f0f4f8;
 }
 
 .patientSection li strong {
     display: block;
-    font-size: 18px;
+    font-size: 20px;
     color: #333;
+    margin-bottom: 10px;
 }
 
-.patientSection ul ul {
-    margin-top: 10px;
+.dischargedPatient {
+    background-color: #e0f7fa;
+    color: #007BFF;
 }
 
 .patientSection button {
-    padding: 8px 15px;
+    padding: 10px 20px;
     margin-right: 10px;
     background-color: #3498db;
     color: white;
@@ -83,22 +100,22 @@
 }
 
 .formWrapper {
-    margin-top: 30px;
+    margin-top: 20px;
     background-color: #f0f4f8;
     border-radius: 12px;
-    padding: 20px;
+    padding: 30px;
     box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
 }
 
 .formWrapper h3 {
     color: #007BFF;
-    font-size: 22px;
-    margin-bottom: 20px;
+    font-size: 26px;
+    margin-bottom: 25px;
 }
 
 input, select {
     width: 100%;
-    padding: 12px;
+    padding: 15px;
     font-size: 16px;
     margin-bottom: 20px;
     border-radius: 6px;
@@ -116,7 +133,7 @@ input:focus, select:focus {
 .submitButton {
     width: 100%;
     padding: 14px;
-    font-size: 16px;
+    font-size: 18px;
     font-weight: 600;
     background-color: #007BFF;
     color: white;
@@ -135,4 +152,35 @@ input:focus, select:focus {
     color: red;
     font-size: 14px;
     margin-top: 10px;
+    text-align: center;
+}
+
+@media (max-width: 768px) {
+    .dashboardWrapper {
+        padding: 30px 20px;
+    }
+
+    .patientList {
+        flex-direction: column;
+    }
+
+    .patientSection {
+        margin: 20px 0;
+    }
+
+    .dashboardHeader {
+        font-size: 28px;
+    }
+
+    .patientSection h4 {
+        font-size: 22px;
+    }
+
+    .formWrapper h3 {
+        font-size: 24px;
+    }
+
+    .submitButton {
+        font-size: 16px;
+    }
 }
