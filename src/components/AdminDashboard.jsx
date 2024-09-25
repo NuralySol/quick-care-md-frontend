@@ -22,6 +22,7 @@ const AdminDashboard = () => {
         fetchDischargedPatients();
     }, []);
 
+
     const fetchUsers = async () => {
         setLoading(true);
         setError('');
@@ -39,6 +40,9 @@ const AdminDashboard = () => {
             setLoading(false);
         }
     };
+
+
+     // handle discharged patients
 
     const fetchDischargedPatients = async () => {
         setError('');
@@ -64,6 +68,10 @@ const AdminDashboard = () => {
         }
     };
 
+
+
+    //Deactivate User
+    
     const handleDeactivateUser = async (userId) => {
         if (currentUser && userId === currentUser.id && users.some(user => user.role === 'doctor')) {
             setShowModal(true);

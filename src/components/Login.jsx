@@ -18,8 +18,6 @@ const Login = () => {
             const response = await login({ username, password });
             console.log(username);
 
-            // Log response to ensure the backend is returning correct data
-            console.log(response.data);
 
             // Store tokens in local storage
             localStorage.setItem('access_token', response.data.access);
@@ -27,11 +25,9 @@ const Login = () => {
 
             // Decode the token to get the role
             const decodedToken = jwtDecode(response.data.access); // Decode JWT
-            console.log("Decoded Token:", decodedToken);
 
             // Check for role in the decoded token
             const role = decodedToken.role;  // Should be 'admin' or 'doctor'
-            console.log("Role in token:", role);
 
             // Navigate based on role
             if (role === 'admin') {
@@ -51,7 +47,6 @@ const Login = () => {
 
     return (
         <div className="login-page-container">
-            {/* Hospital name at the top */}
             <h1 className="hospital-name">QuickCare Md</h1>
             
             <form className="login-form" onSubmit={handleLogin}>
